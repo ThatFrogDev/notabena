@@ -1,6 +1,3 @@
-// TODO: Find a way to save the notes in a sql database and load them with a rust crate.
+// TODO: Save the files in a database
 
-pub fn save_note() {
-    println!("This option is not yet implemented.");
-}
 
