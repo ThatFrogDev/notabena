@@ -1,0 +1,11 @@
+[package]
+name = "notes_app"
+version = "0.1.0"
+edition = "2021"
+authors = [ "ThatBoiDev" ]
+
+[dependencies]
+async-std = "1.12.0"
+chrono = "0.4.23"
+promptly = "0.3.1"
+rusqlite = "0.28.0"
