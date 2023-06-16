@@ -1,8 +1,8 @@
 [package]
-name = "notes_app"
+name = "notaben"
 version = "0.1.0"
-edition = "2021"
-authors = [ "ThatBoiDev" ]
+edition = "2023.1"
+authors = [ "Mart Zielman" ]
 
 [dependencies]
 async-std = "1.12.0"
