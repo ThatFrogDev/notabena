@@ -49,7 +49,7 @@ fn main() {
 
 
 fn show_notes(saved_notes: &[Note]) {
-    println!("Welcome to Notaben, your favorite note taking app.");
+    println!("Welcome to Notabena, your favorite note taking app.");
     println!("=======================");
     if saved_notes.is_empty() {
         println!("There are no notes yet.");
