@@ -59,8 +59,7 @@ fn main() {
 }   
 
 fn show_notes() {
-    let mut saved_notes: Vec<Note> = Vec::new();
-    saved_notes = api::get_notes().expect("");
+    let saved_notes = api::get_notes().expect("");
 
     println!("Welcome to Notabena, your favorite note taking app.");
     println!("=======================");
