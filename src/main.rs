@@ -3,7 +3,6 @@ pub mod api;
 use promptly::{prompt, prompt_default};
 use chrono::prelude::*;
 
-#[derive(Clone)]
 pub struct Note {
     name: String,
     content: String,
@@ -57,7 +56,7 @@ fn new_note() -> Result<(), Box<dyn std::error::Error>> {
     let inputted_note = Note {
         name: prompt("Name")?,
         content: prompt("Content")?,
-        created: format!("{:02}:{:02}", Local::now().hour(), Local::now().minute()),
+        created: format!("{}", Local::now().format("%A %e %B, %H:%M").to_string())
     };
 
     cursor_to_origin();
