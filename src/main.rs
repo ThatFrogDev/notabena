@@ -10,29 +10,6 @@ pub struct Note {
     created: String
 }
 
-// #[derive(Default)]
-// struct Notes(Vec<Notes>);
-
-impl Note {
-    fn save_note(&self, saved_notes: &mut Vec<Note>) {
-        // The API for storing the notes is not yet implemented, for now this is fine:
-        saved_notes.push(self.clone());
-        println!("Your note is saved.");
-        show_notes(saved_notes);
-    }
-}
-
-// TODO: make smamy stuff work
-// impl Notes {
-//     fn save_notes(&mut self, saved_notes: &mut Vec<Note>) {
-//         
-//     }
-// 
-//     fn iter(&self) -> impl Iterator<Item = &Note> {
-//         
-//     }
-// }
-
 fn main() {
     api::init_db().expect("");
 
@@ -59,8 +36,7 @@ fn main() {
 }   
 
 fn show_notes() {
-    let mut saved_notes: Vec<Note> = Vec::new();
-    saved_notes = api::get_notes().expect("");
+    let saved_notes = api::get_notes().expect("");
 
     println!("Welcome to Notabena, your favorite note taking app.");
     println!("=======================");
