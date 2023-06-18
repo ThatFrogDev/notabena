@@ -3,17 +3,41 @@ pub mod api;
 use promptly::{prompt, prompt_default};
 use chrono::prelude::*;
 
+#[derive(Clone)]
 pub struct Note {
     name: String,
     content: String,
     created: String
 }
 
+// #[derive(Default)]
+// struct Notes(Vec<Notes>);
+
+impl Note {
+    fn save_note(&self, saved_notes: &mut Vec<Note>) {
+        // The API for storing the notes is not yet implemented, for now this is fine:
+        saved_notes.push(self.clone());
+        println!("Your note is saved.");
+        show_notes(saved_notes);
+    }
+}
+
+// TODO: make smamy stuff work
+// impl Notes {
+//     fn save_notes(&mut self, saved_notes: &mut Vec<Note>) {
+//         
+//     }
+// 
+//     fn iter(&self) -> impl Iterator<Item = &Note> {
+//         
+//     }
+// }
+
 fn main() {
     api::init_db().expect("");
 
     loop {
-        print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+        cursor_to_origin();
         show_notes();
 
         let new_note_bool = prompt_default("Do you want to create a new note?", false);
@@ -21,10 +45,10 @@ fn main() {
         match new_note_bool {
             Ok(true) => {
                 new_note().expect("");
-                print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+                cursor_to_origin();
             },
             Ok(false) => {
-                print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+                cursor_to_origin();
                 return;
             },
             Err(e) => {
@@ -32,8 +56,7 @@ fn main() {
             },
         }
     }
-}
-
+}   
 
 fn show_notes() {
     let mut saved_notes: Vec<Note> = Vec::new();
@@ -61,7 +84,7 @@ fn new_note() -> Result<(), Box<dyn std::error::Error>> {
         created: format!("{:02}:{:02}", Local::now().hour(), Local::now().minute()),
     };
 
-    print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
+    cursor_to_origin();
     println!("This is the note you just created:");
     println!("=======================");
     println!("Name: {}", inputted_note.name);
@@ -85,4 +108,8 @@ fn new_note() -> Result<(), Box<dyn std::error::Error>> {
             Err(Box::new(e))
         }
     }
+}
+
+fn cursor_to_origin() {
+    print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
 }
