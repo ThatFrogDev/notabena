@@ -10,7 +10,7 @@ pub struct Note {
 }
 
 fn main() {
-    // api::init_db().expect("Initializing failed.");
+    api::init_db().expect("");
 
     loop {
         print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
@@ -58,7 +58,7 @@ fn new_note() -> Result<(), Box<dyn std::error::Error>> {
     let inputted_note = Note {
         name: prompt("Name")?,
         content: prompt("Content")?,
-        created: Local::now().hour().to_string() + ":" + &Local::now().minute().to_string(),
+        created: format!("{:02}:{:02}", Local::now().hour(), Local::now().minute()),
     };
 
     print!("{esc}[2J{esc}[1;1H", esc = 27 as char);

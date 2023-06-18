@@ -1,7 +1,24 @@
+use std::fs::File;
 use rusqlite::{Connection, Result};
 use crate::Note;
 
+pub fn init_db() -> Result<()> {
+    if !File::open("notes.db").is_ok() {
+        File::create("notes.db").expect("Failed to initiate the database.");
+    }
+    let sqlite = Connection::open("notes.db")?;
 
+    sqlite.execute(
+        "CREATE TABLE IF NOT EXISTS saved_notes (
+                name TEXT NOT NULL,
+                content TEXT NOT NULL,
+                created TEXT NOT NULL
+            )",
+        (),
+    )?;
+
+    Ok(())
+}
 
 pub fn save_note(note: &Note) -> Result<()> {
     let sqlite = Connection::open("notes.db")?;
