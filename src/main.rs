@@ -4,6 +4,7 @@ use chrono::prelude::*;
 use inquire::{Confirm, Select, Text};
 
 pub struct Note {
+    id: usize,
     name: String,
     content: String,
     created: String,
@@ -48,10 +49,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn new_note() -> Result<(), Box<dyn std::error::Error>> {
+    let saved_notes = api::get_notes()?;
+
     let inputted_note = Note {
+        id: saved_notes.last(),
         name: Text::new("Name:").prompt()?,
         content: Text::new("Content:").prompt()?,
-        created: format!("{}", Local::now().format("%A %e %B, %H:%M").to_string())
+        created: format!("{}", Local::now().format("%A %e %B, %H:%M").to_string()),
     };
 
     cursor_to_origin();
@@ -133,12 +137,13 @@ fn edit_notes() -> Result<(), Box<dyn std::error::Error>> {
                     .prompt()?;
 
                 let updated_note = Note {
-                  name: edited_name,
-                  content: edited_content,
-                  created: selected_note.created.clone(),
+                    id: index,
+                    name: edited_name,
+                    content: edited_content,
+                    created: selected_note.created.clone(),
                 };
 
-                api::edit_note(&updated_note)?;
+                api::edit_note(&updated_note, index)?;
             }
         }
     }) }
