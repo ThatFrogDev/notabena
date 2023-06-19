@@ -10,6 +10,7 @@ pub fn init_db() -> Result<()> {
 
     sqlite.execute(
         "CREATE TABLE IF NOT EXISTS saved_notes (
+                id INTEGER NOT NULL PRIMARY KEY,
                 name TEXT NOT NULL,
                 content TEXT NOT NULL,
                 created TEXT NOT NULL
@@ -24,9 +25,23 @@ pub fn save_note(note: &Note) -> Result<()> {
     let sqlite = Connection::open("notes.db")?;
 
     sqlite.execute(
-            "INSERT INTO saved_notes (name, content, created) VALUES (?1, ?2, ?3);",
-            (&note.name, &note.content, &note.created),
-        )?;
+        "INSERT INTO saved_notes (id, name, content, created) VALUES (?1, ?2, ?3, ?4);",
+        (&note.name, &note.content, &note.created),
+    )?;
+
+    Ok(())
+}
+
+pub fn edit_note(note: &Note, idx: usize) -> Result<()> {
+    let sqlite = Connection::open("notes.db")?;
+
+    sqlite.execute(
+        "UPDATE saved_notes
+            SET (name) = ?1, (content) = ?2
+            WHERE id = ?3;
+            ",
+        (&note.name, &note.content, &idx),
+    )?;
 
     Ok(())
 }
@@ -34,12 +49,13 @@ pub fn save_note(note: &Note) -> Result<()> {
 pub fn get_notes() -> Result<Vec<Note>> {
     let sqlite = Connection::open("notes.db")?;
 
-    let mut stmt = sqlite.prepare("SELECT name, content, created FROM saved_notes;")?;
+    let mut stmt = sqlite.prepare("SELECT id, name, content, created FROM saved_notes;")?;
     let note_iter = stmt.query_map((), |row| {
         Ok(Note {
-            name: row.get(0)?,
-            content: row.get(1)?,
-            created: row.get(2)?,
+            id: row.get(0)?,
+            name: row.get(1)?,
+            content: row.get(2)?,
+            created: row.get(3)?,
         })
     })?;
 
