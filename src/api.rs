@@ -11,8 +11,7 @@ pub fn init_db() -> Result<()> {
     sqlite.execute(
         "CREATE TABLE IF NOT EXISTS saved_notes (
                 name TEXT NOT NULL,
-                content TEXT NOT NULL,
-                created TEXT NOT NULL
+                content TEXT NOT NULL
             )",
         (),
     )?;
@@ -24,8 +23,8 @@ pub fn save_note(note: &Note) -> Result<()> {
     let sqlite = Connection::open("notes.db")?;
 
     sqlite.execute(
-        "INSERT INTO saved_notes (name, content, created) VALUES (?1, ?2, ?3);",
-        (&note.name, &note.content, &note.created),
+        "INSERT INTO saved_notes (name, content) VALUES (?1, ?2);",
+        (&note.name, &note.content),
     )?;
 
     Ok(())
@@ -35,7 +34,7 @@ pub fn edit_note(note: &Note) -> Result<()> {
     let sqlite = Connection::open("notes.db")?;
 
     sqlite.execute(
-        "UPDATE saved_notes (name, content, created) VALUES (?1, ?2);",
+        "UPDATE saved_notes (name, content) VALUES (?1, ?2);",
         (&note.name, &note.content),
     )?;
 

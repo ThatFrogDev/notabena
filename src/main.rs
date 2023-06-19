@@ -1,6 +1,5 @@
 pub mod api;
 
-use std::ops::{Index, RangeFull};
 use chrono::prelude::*;
 use inquire::{Confirm, Select, Text};
 
@@ -105,7 +104,7 @@ fn edit_notes() -> Result<(), Box<dyn std::error::Error>> {
     if saved_notes.is_empty() {
         println!("You can't edit notes, because there are none.");
         Ok(())
-    } else {
+    } else { Ok({
         for note in &saved_notes {
             let mut truncated_content: String = note
                 .content
@@ -120,17 +119,17 @@ fn edit_notes() -> Result<(), Box<dyn std::error::Error>> {
             options.push(format!("{} | {} | {}", note.name, truncated_content, note.created));
         }
 
-        let selection = Select::new("Select the note that you want to edit: ", options).prompt(); 
+        let selection = Select::new("Select the note that you want to edit: ", options.clone()).prompt();
+        let selection_index = options.iter().position(|n| n == selection.as_ref().unwrap()).unwrap();
 
-        match selection {
-            Ok(selection) => {
-                let selection_index = selection.index(RangeFull);
-                let selected_note = saved_notes[selection_index];
+        match selection_index {
+            index => {
+                let selected_note = &saved_notes[index];
                 let edited_name = Text::new("Name:")
-                    .with_initial_value(selected_note.name)
+                    .with_initial_value(&selected_note.name)
                     .prompt()?;
                 let edited_content = Text::new("Content:")
-                    .with_initial_value(selected_note.content)
+                    .with_initial_value(&selected_note.content)
                     .prompt()?;
 
                 let updated_note = Note {
@@ -141,12 +140,8 @@ fn edit_notes() -> Result<(), Box<dyn std::error::Error>> {
 
                 api::edit_note(&updated_note)?;
             }
-            Err(e) => {
-                println!("There was an error: {}", e);
-            }
         }
-        Ok(())
-    }
+    }) }
 }
 
 fn delete_notes() -> Result<(), Box<dyn std::error::Error>> {
