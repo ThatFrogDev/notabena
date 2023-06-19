@@ -4,7 +4,6 @@ use std::ops::{Index, RangeFull};
 use chrono::prelude::*;
 use inquire::{Confirm, Select, Text};
 
-#[derive(Clone)]
 pub struct Note {
     name: String,
     content: String,
@@ -53,7 +52,7 @@ fn new_note() -> Result<(), Box<dyn std::error::Error>> {
     let inputted_note = Note {
         name: Text::new("Name:").prompt()?,
         content: Text::new("Content:").prompt()?,
-        created: format!("{:02}:{:02}", Local::now().hour(), Local::now().minute()),
+        created: format!("{}", Local::now().format("%A %e %B, %H:%M").to_string())
     };
 
     cursor_to_origin();
