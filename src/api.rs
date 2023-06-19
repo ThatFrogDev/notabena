@@ -24,9 +24,20 @@ pub fn save_note(note: &Note) -> Result<()> {
     let sqlite = Connection::open("notes.db")?;
 
     sqlite.execute(
-            "INSERT INTO saved_notes (name, content, created) VALUES (?1, ?2, ?3);",
-            (&note.name, &note.content, &note.created),
-        )?;
+        "INSERT INTO saved_notes (name, content, created) VALUES (?1, ?2, ?3);",
+        (&note.name, &note.content, &note.created),
+    )?;
+
+    Ok(())
+}
+
+pub fn edit_note(note: &Note) -> Result<()> {
+    let sqlite = Connection::open("notes.db")?;
+
+    sqlite.execute(
+        "UPDATE saved_notes (name, content, created) VALUES (?1, ?2);",
+        (&note.name, &note.content),
+    )?;
 
     Ok(())
 }
