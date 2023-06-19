@@ -2,7 +2,7 @@
 name = "notabena"
 version = "0.0.1-dev"
 edition = "2021"
-authors = [ "Mart Zielman", "Goos" ]
+authors = [ "Mart Zielman", "Serge" ]
 
 [dependencies]
 async-std = "1.12.0"

@@ -1,5 +1,5 @@
 use std::fs::File;
-use rusqlite::{Connection, Result};
+use rusqlite::{Connection, params, Result};
 use crate::Note;
 
 pub fn init_db() -> Result<()> {
@@ -10,7 +10,7 @@ pub fn init_db() -> Result<()> {
 
     sqlite.execute(
         "CREATE TABLE IF NOT EXISTS saved_notes (
-                id INTEGER NOT NULL PRIMARY KEY,
+                id INTEGER NOT NULL,
                 name TEXT NOT NULL,
                 content TEXT NOT NULL,
                 created TEXT NOT NULL
@@ -26,7 +26,7 @@ pub fn save_note(note: &Note) -> Result<()> {
 
     sqlite.execute(
         "INSERT INTO saved_notes (id, name, content, created) VALUES (?1, ?2, ?3, ?4);",
-        (&note.name, &note.content, &note.created),
+        (&note.id, &note.name, &note.content, &note.created),
     )?;
 
     Ok(())
@@ -41,6 +41,17 @@ pub fn edit_note(note: &Note, idx: usize) -> Result<()> {
             WHERE id = ?3;
             ",
         (&note.name, &note.content, &idx),
+    )?;
+
+    Ok(())
+}
+
+pub fn delete_note(idx: usize) -> Result<()> {
+    let sqlite = Connection::open("notes.db")?;
+
+    sqlite.execute(
+        "DELETE FROM saved_notes WHERE id = ?1;",
+        params![&idx],
     )?;
 
     Ok(())

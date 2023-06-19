@@ -1,3 +1,4 @@
+// TODO: Organize the code into different files
 pub mod api;
 
 use chrono::prelude::*;
@@ -52,7 +53,7 @@ fn new_note() -> Result<(), Box<dyn std::error::Error>> {
     let saved_notes = api::get_notes()?;
 
     let inputted_note = Note {
-        id: saved_notes.last(),
+        id: saved_notes.len(),
         name: Text::new("Name:").prompt()?,
         content: Text::new("Content:").prompt()?,
         created: format!("{}", Local::now().format("%A %e %B, %H:%M").to_string()),
@@ -84,11 +85,11 @@ fn new_note() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn show_notes() -> Result<(), Box<dyn std::error::Error>> {
+    // TODO: Make the notes selectable to fully view them
     let saved_notes = api::get_notes()?;
 
     if saved_notes.is_empty() {
-        println!("There are no notes yet.");
-        println!("=======================");
+        println!("You don't have any notes.");
         return Ok(());
     } else {
         for note in saved_notes {
@@ -129,10 +130,10 @@ fn edit_notes() -> Result<(), Box<dyn std::error::Error>> {
         match selection_index {
             index => {
                 let selected_note = &saved_notes[index];
-                let edited_name = Text::new("Name:")
+                let edited_name = Text::new("New name:")
                     .with_initial_value(&selected_note.name)
                     .prompt()?;
-                let edited_content = Text::new("Content:")
+                let edited_content = Text::new("New content:")
                     .with_initial_value(&selected_note.content)
                     .prompt()?;
 
@@ -144,13 +145,45 @@ fn edit_notes() -> Result<(), Box<dyn std::error::Error>> {
                 };
 
                 api::edit_note(&updated_note, index)?;
+                println!("Note updated successfully.");
             }
         }
     }) }
 }
 
 fn delete_notes() -> Result<(), Box<dyn std::error::Error>> {
-    todo!()
+    // TODO: Implement select multiple and delete all
+    let saved_notes = api::get_notes()?;
+    let mut options: Vec<String> = Vec::new();
+
+    if saved_notes.is_empty() {
+        println!("You can't delete notes, because there are none.");
+        Ok(())
+    } else { Ok({
+        for note in &saved_notes {
+            let mut truncated_content: String = note
+                .content
+                .chars()
+                .take(10)
+                .collect();
+
+            if truncated_content.chars().count() == 10 {
+                truncated_content = truncated_content + "...";
+            }
+
+            options.push(format!("{} | {} | {}", note.name, truncated_content, note.created));
+        }
+
+        let selection = Select::new("Select the note that you want to delete: ", options.clone()).prompt();
+        let selection_index = options.iter().position(|n| n == selection.as_ref().unwrap()).unwrap();
+
+        match selection_index {
+            index => {
+                api::delete_note(index)?;
+                println!("Note deleted successfully.");
+            }
+        }
+    }) }
 }
 
 fn cursor_to_origin() {
