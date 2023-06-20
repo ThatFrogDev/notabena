@@ -18,7 +18,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     loop {
         cursor_to_origin();
 
-        let options: Vec<&str> = vec!["New note", "View note", "Edit note", "Delete note", "Exit"];
+        let options = vec!["New note", "View note", "Edit note", "Delete note", "Exit"];
         let select = Select::new("What do you want to do?", options).prompt();
 
         match select {
@@ -82,66 +82,48 @@ fn new_note() -> Result<(), Box<dyn std::error::Error>> {
 fn show_notes() -> Result<(), Box<dyn std::error::Error>> {
     let saved_notes = api::get_notes()?;
     let mut options: Vec<String> = Vec::new();
-    let _ = no_notes("You don't have any notes");
-    let _ = truncated_note(&mut options);
-    let selection = Select::new("Select the note that you want to view: ", options.clone()).prompt();
+    truncated_note(&mut options)?;
+    let selection = Select::new("Select the note that you want to view:", options.clone()).prompt();
     let selection_index = options.iter().position(|n| n == selection.as_ref().unwrap()).unwrap();
-    let selected_note = &saved_notes[selection_index];
 
-    display_note(selected_note);
-    return Ok(());
+    if api::get_notes()?.is_empty() {
+        println!("{}", "You don't have any notes.");
+        return Ok(());
+    } else {
+        let selected_note = &saved_notes[selection_index];
+
+        display_note(selected_note);
+        return Ok(());
+    }
 }
 
 fn edit_notes() -> Result<(), Box<dyn std::error::Error>> {
     let saved_notes = api::get_notes()?;
     let mut options: Vec<String> = Vec::new();
-    let _ = no_notes("You can't edit notes, because there are none.");
-    let _ = truncated_note(&mut options);
-    let selection = Select::new("Select the note that you want to edit: ", options.clone()).prompt();
+    truncated_note(&mut options)?;
+    let selection = Select::new("Select the note that you want to edit:", options.clone()).prompt();
     let selection_index = options.iter().position(|n| n == selection.as_ref().unwrap()).unwrap();
-    let selected_note = &saved_notes[selection_index];
-    let updated_note = Note {
-        id: selection_index,
-        name: Text::new("New name:").with_initial_value(&selected_note.name).prompt()?,
-        content: Text::new("New content:").with_initial_value(&selected_note.content).prompt()?,
-        created: selected_note.created.clone(),
-    };
 
-    let edit_note_bool = Confirm::new("Are you sure that you want to edit these notes?")
-        .with_default(true)
-        .prompt();
-        
-    return match edit_note_bool {
-        Ok(true) => {
-            api::edit_note(&updated_note, selection_index)?;
-            println!("Note updated successfully.");
-            Ok(())
-        }
-        Ok(false) => Ok(()),
-        Err(e) => {
-            println!("There was an error: {}", e);
-            Err(Box::new(e))
-        }
-    };
-}
-
-fn delete_notes() -> Result<(), Box<dyn std::error::Error>> {
-    // TODO: Implement select multiple
-    let mut options: Vec<String> = Vec::new();
-    let _ = no_notes("You can't delete notes, because there are none.");
-    let _ = truncated_note(&mut options);
-    let selections = MultiSelect::new("Select the notes that you want to delete: ", options.clone()).prompt();
-    let delete_note_bool = Confirm::new("Are you sure that you want to delete these notes?")
-        .with_default(true)
-        .prompt();
-
-    return Ok(for selection in selections.unwrap() {
-        let selection_index = options.iter().position(|n| n == &selection.as_ref()).unwrap(); 
-        
-        return match delete_note_bool {
+    if api::get_notes()?.is_empty() {
+        println!("{}", "You can't edit notes, because there are none.");
+        return Ok(());
+    } else {
+        let selected_note = &saved_notes[selection_index];
+        let updated_note = Note {
+            id: selection_index,
+            name: Text::new("New name:").with_initial_value(&selected_note.name).prompt()?,
+            content: Text::new("New content:").with_initial_value(&selected_note.content).prompt()?,
+            created: selected_note.created.clone(),
+        };
+    
+        let edit_note_bool = Confirm::new("Are you sure that you want to edit this note?")
+            .with_default(true)
+            .prompt();
+            
+        return match edit_note_bool {
             Ok(true) => {
-                api::delete_note(selection_index)?;
-                println!("Notes deleted successfully.");
+                api::edit_note(&updated_note, selection_index)?;
+                println!("Note updated successfully.");
                 Ok(())
             }
             Ok(false) => Ok(()),
@@ -150,7 +132,39 @@ fn delete_notes() -> Result<(), Box<dyn std::error::Error>> {
                 Err(Box::new(e))
             }
         };
-    });
+    }
+}
+
+fn delete_notes() -> Result<(), Box<dyn std::error::Error>> {
+    // TODO: Implement select multiple
+    let mut options: Vec<String> = Vec::new();
+    truncated_note(&mut options)?;
+    let selections = MultiSelect::new("Select the notes that you want to delete:", options.clone()).prompt();
+    let delete_note_bool = Confirm::new("Are you sure that you want to delete these notes?")
+        .with_default(true)
+        .prompt();
+
+    if api::get_notes()?.is_empty() {
+        println!("{}", "You can't delete notes, because there are none.");
+        return Ok(());
+    } else {
+        return Ok(for selection in selections.unwrap() {
+            let selection_index = options.iter().position(|n| n == &selection.as_ref()).unwrap(); 
+            
+            return match delete_note_bool {
+                Ok(true) => {
+                    api::delete_note(selection_index)?;
+                    println!("Notes deleted successfully.");
+                    Ok(())
+                }
+                Ok(false) => Ok(()),
+                Err(e) => {
+                    println!("There was an error: {}", e);
+                    Err(Box::new(e))
+                }
+            };
+        });
+    }
 }
 
 fn display_note(note: &Note) {
@@ -170,13 +184,6 @@ fn truncated_note(options: &mut Vec<String>) -> Result<(), Box<dyn std::error::E
         }
 
         options.push(format!("{} | {} | {}", note.name, truncated_content, note.created));
-    })
-}
-
-fn no_notes(message: &str) -> Result<(), Box<dyn std::error::Error>> {
-    Ok(if api::get_notes()?.is_empty() {
-        println!("{}", message);
-        return Ok(());
     })
 }
 
