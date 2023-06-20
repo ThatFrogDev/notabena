@@ -15,7 +15,7 @@ pub fn init_db() -> Result<()> {
                 content TEXT NOT NULL,
                 created TEXT NOT NULL
             )",
-        (),
+        params![],
     )?;
 
     Ok(())
@@ -26,7 +26,7 @@ pub fn save_note(note: &Note) -> Result<()> {
 
     sqlite.execute(
         "INSERT INTO saved_notes (id, name, content, created) VALUES (?1, ?2, ?3, ?4);",
-        (&note.id, &note.name, &note.content, &note.created),
+        params![&note.id, &note.name, &note.content, &note.created],
     )?;
 
     Ok(())
@@ -40,7 +40,7 @@ pub fn edit_note(note: &Note, idx: usize) -> Result<()> {
             SET (name) = ?1, (content) = ?2
             WHERE id = ?3;
             ",
-        (&note.name, &note.content, &idx),
+        params![&note.name, &note.content, &idx],
     )?;
 
     Ok(())
