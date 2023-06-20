@@ -77,10 +77,7 @@ fn show_notes() -> Result<(), Box<dyn std::error::Error>> {
     let mut options: Vec<String> = Vec::new();
     truncated_note(&mut options)?;
     let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Select the note that you want to view:")
-        .items(&options)
-        .interact()
-        .unwrap();
+        .with_prompt("Select the note that you want to view:").items(&options).interact().unwrap();
 
     if api::get_notes()?.is_empty() {
         println!("{}", "You don't have any notes.");
@@ -134,10 +131,7 @@ fn delete_notes() -> Result<(), Box<dyn std::error::Error>> {
         .with_prompt("Select the notes that you want to delete:").items(&options).interact().unwrap();
 
     let delete_note_bool = Confirm::with_theme(&ColorfulTheme::default())
-        .with_prompt("Are you sure that you want to delete these notes?")
-        .default(true)
-        .interact()
-        .unwrap();
+        .with_prompt("Are you sure that you want to delete these notes?").default(true).interact().unwrap();
 
     if api::get_notes()?.is_empty() {
         println!("{}", "You can't delete notes, because there are none.");
