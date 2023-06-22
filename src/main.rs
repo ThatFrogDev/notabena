@@ -163,7 +163,6 @@ fn delete_notes() -> Result<(), Box<dyn std::error::Error>> {
         .interact()
         .unwrap();
 
-    // TODO: see the above TODO
     let delete_note_bool = Confirm::with_theme(&ColorfulTheme::default())
         .with_prompt("Are you sure that you want to delete these note(s)?")
         .default(true)
@@ -174,16 +173,13 @@ fn delete_notes() -> Result<(), Box<dyn std::error::Error>> {
         println!("You can't delete notes, because there are none.");
         return Ok(());
     } else {
-        return Ok(for selection in selections {
-            return match delete_note_bool {
-                true => {
-                    api::delete_note(selection)?;
-                    println!("Notes deleted successfully.");
-                    Ok(())
-                }
-                false => Ok(()),
-            };
-        });
+        for selection in selections {
+            if delete_note_bool {
+                api::delete_note(selection)?;
+            }
+        }
+        println!("Notes deleted successfully.");
+        return Ok(());
     }
 }
 
