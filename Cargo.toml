@@ -1,6 +1,6 @@
 [package]
 name = "notabena"
-version = "0.1.0-alpha-preview"
+version = "0.1.0-preview"
 edition = "2021"
 authors = [ "Mart Zielman", "Sergey B." ]
 
