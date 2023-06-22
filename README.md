@@ -7,19 +7,19 @@ Notabena is the free and open source note-taking app, written in pure Rust.
 ## Features
 These are our current planned features. (Most features under CLI are also featured in the GUI when it's released, for the two are planned to be fully compatible)
 
-[x] CLI
-  [x] Make notes
-  [x] Edit notes
-  [x] Delete notes
-    [x] Delete multiple notes at once
-  [x] Local SQL database
-  [ ] Encrypted notes
-  [ ] Simple Markdown support
-  [ ] Compatibility with the GUI
-[ ] GUI
-  [ ] Custom themes
-  [ ] Private vault: only accessible with PIN
-  [ ] Folders
+- [x] CLI
+  - [x] Make notes
+  - [x] Edit notes
+  - [x] Delete notes
+    - [x] Delete multiple notes at once
+  - [x] Local SQL database
+  - [ ] Encrypted notes
+  - [ ] Simple Markdown support
+  - [ ] Compatibility with the GUI
+- [ ] GUI
+  - [ ] Custom themes
+  - [ ] Private vault: only accessible with PIN
+  - [ ] Folders
 
 ## Help us!
 You can help us in different ways.
