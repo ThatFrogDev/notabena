@@ -23,8 +23,8 @@ These are our current planned features. (Most features under CLI are also featur
 
 ## Help us!
 You can help us in different ways.
-- 🪲 ・ Be a Bughunter: Search for bugs and file an issue if the output isn't as expected or if the program crashes.
-- 🖥️ ・ Suggest features: File an issue (use the Suggest features issue template) and the devs will look into it.
-- 🧹 ・ Fix issues: Are you a Rust developer and interested in the project: try to fix the issues and open a pull request! (Especially the ones tagged with `good first issue`)
+🪲 ・ Be a Bughunter: Search for bugs and file an issue if the output isn't as expected or if the program crashes.
+🖥️ ・ Suggest features: File an issue (use the Suggest features issue template) and the devs will look into it.
+🧹 ・ Fix issues: Are you a Rust developer and interested in the project: try to fix the issues and open a pull request! (Especially the ones tagged with `good first issue`)
 
 **Contributing guidelines** for these three roles coming soon!
