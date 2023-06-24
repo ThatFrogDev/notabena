@@ -5,10 +5,11 @@ updates:
     schedule:
       interval: "weekly"
       day: "saturday"
+    assignees:
+      - "ThatFrogDev"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-  assignees:
+    assignees:
       - "ThatFrogDev"
-    
