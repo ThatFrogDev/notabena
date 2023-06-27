@@ -1,0 +1,11 @@
+[package]
+name = "notabena"
+version = "0.1.0-preview"
+edition = "2021"
+authors = [ "Mart Zielman", "Sergey B." ]
+
+[dependencies]
+async-std = "1.12.0"
+chrono = "0.4.26"
+dialoguer = "0.10.4"
+rusqlite = { version = "0.29.0", features = ["bundled"] }
