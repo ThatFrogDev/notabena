@@ -1,6 +1,8 @@
 // TODO: Organize the code into different files
 pub mod api;
 
+use std::process::Command;
+
 use chrono::prelude::*;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, MultiSelect, Select};
 
@@ -13,11 +15,10 @@ pub struct Note {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     api::init_db()?;
+    cursor_to_origin()?;
     println!("Welcome to Notabena, the FOSS note-taking app.");
 
     loop {
-        //cursor_to_origin();
-
         let options = vec!["New note", "View note", "Edit note", "Delete note", "Exit"];
         let select = Select::with_theme(&ColorfulTheme::default())
             .with_prompt("What do you want to do?")
@@ -27,22 +28,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         match select {
             0 => {
+                cursor_to_origin()?;
                 new_note().expect("Creating a new note failed");
-                //cursor_to_origin();
             }
             1 => {
-                show_notes()?;
-                //cursor_to_origin();
+                cursor_to_origin()?;
+                show_notes().expect("Failed fetching the notes");
             }
             2 => {
+                cursor_to_origin()?;
                 edit_notes().expect("Editing the note failed");
-                //cursor_to_origin();
             }
             3 => {
+                cursor_to_origin()?;
                 delete_notes().expect("Deleting the note failed");
-                //cursor_to_origin();
             }
             _ => {
+                cursor_to_origin()?;
                 return Ok(());
             }
         }
@@ -64,9 +66,11 @@ fn new_note() -> Result<(), Box<dyn std::error::Error>> {
         created: format!("{}", Local::now().format("%A %e %B, %H:%M")),
     };
 
-    //cursor_to_origin();
+    cursor_to_origin()?;
+
     println!("This is the note you're about to create:");
-    display_note(&inputted_note);
+    display_note(&inputted_note)?;
+
 
     let save_note_bool = Confirm::with_theme(&ColorfulTheme::default())
         .with_prompt("Do you want to save this note?")
@@ -77,6 +81,7 @@ fn new_note() -> Result<(), Box<dyn std::error::Error>> {
     return match save_note_bool {
         true => {
             api::save_note(&inputted_note)?;
+            cursor_to_origin()?;
             println!("Note created successfully.");
             Ok(())
         }
@@ -99,7 +104,7 @@ fn show_notes() -> Result<(), Box<dyn std::error::Error>> {
             .unwrap();
 
         let selected_note = &saved_notes[selection];
-        display_note(selected_note);
+        display_note(&selected_note)?;
         return Ok(());
     }
 }
@@ -115,6 +120,7 @@ fn edit_notes() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap();
 
     if api::get_notes()?.is_empty() {
+        cursor_to_origin()?;
         println!("You can't edit notes, because there are none.");
         return Ok(());
     } else {
@@ -143,6 +149,7 @@ fn edit_notes() -> Result<(), Box<dyn std::error::Error>> {
         return match edit_note_bool {
             true => {
                 api::edit_note(&updated_note, selection)?;
+                cursor_to_origin()?;
                 println!("Note updated successfully.");
                 Ok(())
             }
@@ -170,6 +177,7 @@ fn delete_notes() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap();
 
     if api::get_notes()?.is_empty() {
+        cursor_to_origin()?;
         println!("You can't delete notes, because there are none.");
         return Ok(());
     } else {
@@ -178,17 +186,20 @@ fn delete_notes() -> Result<(), Box<dyn std::error::Error>> {
                 api::delete_note(selection)?;
             }
         }
+        cursor_to_origin()?;
         println!("Notes deleted successfully.");
         return Ok(());
     }
 }
 
-fn display_note(note: &Note) {
+fn display_note(note: &Note) -> Result<(), Box<dyn std::error::Error>> {
     println!("=======================");
     println!("Name: {}", note.name);
     println!("Content: {}", note.content);
     println!("Created at: {}", note.created);
     println!("=======================");
+
+    Ok(())
 }
 
 fn truncated_note(options: &mut Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
@@ -206,7 +217,17 @@ fn truncated_note(options: &mut Vec<String>) -> Result<(), Box<dyn std::error::E
     })
 }
 
-// TODO: Fix this method and its uses
-/* fn cursor_to_origin() {
-    print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
-} */
+fn cursor_to_origin() -> Result<(), Box<dyn std::error::Error>> {
+    if cfg!(target_os = "windows") {
+        Command::new("cmd")
+            .args(["/c", "cls"])
+            .spawn()?
+            .wait()?;
+        Ok(())
+    } else {
+        Command::new("clear")
+            .spawn()?
+            .wait()?;
+        Ok(())
+    }
+}
