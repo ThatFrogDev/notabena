@@ -1,0 +1,35 @@
+name: Feature request
+description: Suggest cool features!
+title: FRQ ・ [Brief description]
+labels: [ "enhancement" ]
+
+body: 
+
+  - type: markdown
+    attributes:
+      value: |
+        Welcome to the Notabena Feature Request form. Please fill out any fields that are applicable.
+
+  - type: dropdown
+    attributes:
+      label: "Is this a fix to a problem or just a new feature that you'd like to see?"
+      options: 
+        - Problem
+        - New feature
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: "For what problem is your feature a fix?"
+      description: "Describe something you don't like about the app and would love to see another solution for"
+    validations:
+        required: false
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: "What is the solution or feature?"
+      description: "Describe what the feature is supposed to do. Be concise!"
+    validations:
+        required: true
+
