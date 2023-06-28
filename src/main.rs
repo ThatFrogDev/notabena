@@ -71,7 +71,6 @@ fn new_note() -> Result<(), Box<dyn std::error::Error>> {
     println!("This is the note you're about to create:");
     display_note(&inputted_note)?;
 
-
     let save_note_bool = Confirm::with_theme(&ColorfulTheme::default())
         .with_prompt("Do you want to save this note?")
         .default(true)
@@ -219,15 +218,10 @@ fn truncated_note(options: &mut Vec<String>) -> Result<(), Box<dyn std::error::E
 
 fn cursor_to_origin() -> Result<(), Box<dyn std::error::Error>> {
     if cfg!(target_os = "windows") {
-        Command::new("cmd")
-            .args(["/c", "cls"])
-            .spawn()?
-            .wait()?;
+        Command::new("cmd").args(["/c", "cls"]).spawn()?.wait()?;
         Ok(())
     } else {
-        Command::new("clear")
-            .spawn()?
-            .wait()?;
+        Command::new("clear").spawn()?.wait()?;
         Ok(())
     }
 }

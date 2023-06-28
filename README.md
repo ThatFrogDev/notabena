@@ -1,5 +1,5 @@
 # Notabena
-![CI checks](https://github.com/thatfrogdev/notabena/actions/workflows/ci-checks.yml/badge.svg)
+![CI checks](https://github.com/thatfrogdev/notabena/actions/workflows/ci-checks.yml/badge.svg) ![crates.io](https://img.shields.io/crates/v/notabena.svg)
 
 ## About
 Notabena is the free and open source note-taking app, written in pure Rust.
