@@ -9,7 +9,7 @@ homepage = "https://github.com/thatfrogdev/notabena"
 repository = "https://github.com/thatfrogdev/notabena"
 readme = "README.md"
 keywords = [ "notes", "cli", "gui", "markdown"]
-categories = [ "command-line-utilities", "graphical-user-interface", "text-processing" ]
+categories = [ "command-line-utilities", "gui", "text-processing" ]
 
 [dependencies]
 async-std = "1.12.0"
