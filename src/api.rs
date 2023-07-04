@@ -14,7 +14,6 @@ pub fn init_db(
             .parent()
             .unwrap()
             .to_path_buf()
-            .join("Roaming")
             .join("Notabena");
 
         println!("{:?}", &notabena_directory);

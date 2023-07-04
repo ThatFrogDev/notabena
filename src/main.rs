@@ -15,7 +15,7 @@ pub struct Note {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let data_directory: PathBuf = BaseDirs::new().unwrap().data_dir().into();
+    let data_directory: PathBuf = BaseDirs::new().unwrap().config_dir().into();
     let db_file = data_directory.join("Notabena").join("notes.db");
     api::init_db(&data_directory, &db_file)?;
     cursor_to_origin()?;
