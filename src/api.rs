@@ -1,13 +1,29 @@
 use crate::Note;
+use async_std::path::PathBuf;
 use rusqlite::{params, Connection, Result};
-use std::fs::File;
+use std::fs::{self, File};
 
-pub fn init_db() -> Result<()> {
-    if !File::open("notes.db").is_ok() {
-        File::create("notes.db").expect("Failed to initiate the database.");
+pub fn init_db(
+    data_directory: &PathBuf,
+    db_file: &PathBuf,
+) -> Result<(), Box<dyn std::error::Error>> {
+    if File::open(&db_file).is_ok() {
+        println!("Database file already exists at {:?}", &db_file);
+    } else {
+        let notabena_directory = data_directory
+            .parent()
+            .unwrap()
+            .to_path_buf()
+            .join("Notabena");
+
+        println!("{:?}", &notabena_directory);
+
+        fs::create_dir_all(&notabena_directory)?;
+        File::create(&db_file)?;
+        println!("Created database file at {:?}", &db_file);
     }
 
-    Connection::open("notes.db")?.execute(
+    Connection::open(&db_file)?.execute(
         "CREATE TABLE IF NOT EXISTS saved_notes (
                 id INTEGER NOT NULL,
                 name TEXT NOT NULL,
@@ -43,7 +59,10 @@ pub fn edit_note(note: &Note, idx: usize) -> Result<()> {
 pub fn delete_notes(idx: Vec<usize>) -> Result<()> {
     let sqlite = Connection::open("notes.db")?;
     for identifier in idx {
-        sqlite.execute("DELETE FROM saved_notes WHERE id = ?1;", params![&identifier])?;
+        sqlite.execute(
+            "DELETE FROM saved_notes WHERE id = ?1;",
+            params![&identifier],
+        )?;
     }
 
     Ok(())
