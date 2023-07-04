@@ -6,9 +6,8 @@ pub fn init_db() -> Result<()> {
     if !File::open("notes.db").is_ok() {
         File::create("notes.db").expect("Failed to initiate the database.");
     }
-    let sqlite = Connection::open("notes.db")?;
 
-    sqlite.execute(
+    Connection::open("notes.db")?.execute(
         "CREATE TABLE IF NOT EXISTS saved_notes (
                 id INTEGER NOT NULL,
                 name TEXT NOT NULL,
@@ -22,9 +21,7 @@ pub fn init_db() -> Result<()> {
 }
 
 pub fn save_note(note: &Note) -> Result<()> {
-    let sqlite = Connection::open("notes.db")?;
-
-    sqlite.execute(
+    Connection::open("notes.db")?.execute(
         "INSERT INTO saved_notes (id, name, content, created) VALUES (?1, ?2, ?3, ?4);",
         params![&note.id, &note.name, &note.content, &note.created],
     )?;
@@ -33,23 +30,21 @@ pub fn save_note(note: &Note) -> Result<()> {
 }
 
 pub fn edit_note(note: &Note, idx: usize) -> Result<()> {
-    let sqlite = Connection::open("notes.db")?;
-
-    sqlite.execute(
+    Connection::open("notes.db")?.execute(
         "UPDATE saved_notes
             SET (name) = ?1, (content) = ?2
-            WHERE id = ?3;
-            ",
+            WHERE id = ?3;",
         params![&note.name, &note.content, &idx],
     )?;
 
     Ok(())
 }
 
-pub fn delete_note(idx: usize) -> Result<()> {
+pub fn delete_notes(idx: Vec<usize>) -> Result<()> {
     let sqlite = Connection::open("notes.db")?;
-
-    sqlite.execute("DELETE FROM saved_notes WHERE id = ?1;", params![&idx])?;
+    for identifier in idx {
+        sqlite.execute("DELETE FROM saved_notes WHERE id = ?1;", params![&identifier])?;
+    }
 
     Ok(())
 }
