@@ -1,8 +1,10 @@
 // TODO: Organize the code into different files
 pub mod api;
 
+use async_std::path::PathBuf;
 use chrono::prelude::*;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, MultiSelect, Select};
+use directories::BaseDirs;
 use std::process::Command;
 
 pub struct Note {
@@ -13,7 +15,11 @@ pub struct Note {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    api::init_db()?;
+    let data_directory: PathBuf = BaseDirs::new().unwrap().data_dir().into();
+    let db_file = data_directory.join("Notabena").join("notes.db");
+    api::init_db(&data_directory, &db_file)?;
+    cursor_to_origin()?;
+    println!("Welcome to Notabena!");
 
     loop {
         let options = vec![
@@ -25,7 +31,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "Exit",
         ];
 
-        match select("Welcome to Notabena!", &options) {
+        match select("What do you want to do?", &options) {
             0 => new_note().expect("Creating a new note failed"),
             1 => show_notes().expect("Failed fetching the notes"),
             2 => edit_notes().expect("Editing the note failed"),
