@@ -36,8 +36,8 @@ pub fn init_db(
     Ok(())
 }
 
-pub fn save_note(note: &Note) -> Result<()> {
-    Connection::open("notes.db")?.execute(
+pub fn save_note(note: &Note, db_file: &PathBuf) -> Result<()> {
+    Connection::open(&db_file)?.execute(
         "INSERT INTO saved_notes (id, name, content, created) VALUES (?1, ?2, ?3, ?4);",
         params![&note.id, &note.name, &note.content, &note.created],
     )?;
@@ -45,8 +45,8 @@ pub fn save_note(note: &Note) -> Result<()> {
     Ok(())
 }
 
-pub fn edit_note(note: &Note, idx: usize) -> Result<()> {
-    Connection::open("notes.db")?.execute(
+pub fn edit_note(note: &Note, idx: usize, db_file: &PathBuf) -> Result<()> {
+    Connection::open(&db_file)?.execute(
         "UPDATE saved_notes
             SET (name) = ?1, (content) = ?2
             WHERE id = ?3;",
@@ -56,8 +56,8 @@ pub fn edit_note(note: &Note, idx: usize) -> Result<()> {
     Ok(())
 }
 
-pub fn delete_notes(idx: Vec<usize>) -> Result<()> {
-    let sqlite = Connection::open("notes.db")?;
+pub fn delete_notes(idx: Vec<usize>, db_file: &PathBuf) -> Result<()> {
+    let sqlite = Connection::open(&db_file)?;
     for identifier in idx {
         sqlite.execute(
             "DELETE FROM saved_notes WHERE id = ?1;",
@@ -68,8 +68,8 @@ pub fn delete_notes(idx: Vec<usize>) -> Result<()> {
     Ok(())
 }
 
-pub fn get_notes() -> Result<Vec<Note>> {
-    let sqlite = Connection::open("notes.db")?;
+pub fn get_notes(db_file: &PathBuf) -> Result<Vec<Note>> {
+    let sqlite = Connection::open(&db_file)?;
 
     let mut stmt = sqlite.prepare("SELECT id, name, content, created FROM saved_notes;")?;
     let note_iter = stmt.query_map((), |row| {
