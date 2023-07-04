@@ -2,7 +2,7 @@
 name = "notabena"
 version = "0.1.0-preview"
 edition = "2021"
-authors = [ "Mart Zielman", "Sergey B." ]
+authors = [ "Mart Zielman", "MrSerge01" ]
 license-file = "LICENSE.md"
 description = "[PREVIEW] A work-in-progress note-taking app for the command line. GUI support will be added (see README)."
 homepage = "https://github.com/thatfrogdev/notabena"

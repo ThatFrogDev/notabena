@@ -1,9 +1,9 @@
 // TODO: Organize the code into different files
 pub mod api;
 
-use std::process::Command;
 use chrono::prelude::*;
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, MultiSelect, Select};
+use std::process::Command;
 
 pub struct Note {
     id: usize,
@@ -14,17 +14,23 @@ pub struct Note {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     api::init_db()?;
-    cursor_to_origin()?;
-    println!("Welcome to Notabena, the FOSS note-taking app.");
 
     loop {
-        let options = vec!["New note", "View note", "Edit note", "Delete note", "Exit"];
+        let options = vec![
+            "New note",
+            "View note",
+            "Edit note",
+            "Delete note",
+            "About",
+            "Exit",
+        ];
 
-        match select("What do you want to do?", &options) {
+        match select("Welcome to Notabena!", &options) {
             0 => new_note().expect("Creating a new note failed"),
             1 => show_notes().expect("Failed fetching the notes"),
             2 => edit_notes().expect("Editing the note failed"),
             3 => delete_notes().expect("Deleting the note failed"),
+            4 => display_about().expect("Viewing about failed"),
             _ => return Ok(()),
         }
     }
@@ -105,7 +111,9 @@ fn delete_notes() -> Result<(), Box<dyn std::error::Error>> {
     let mut options: Vec<String> = Vec::new();
     truncated_note(&mut options)?;
     let selections = MultiSelect::with_theme(&ColorfulTheme::default())
-        .with_prompt("Select the note(s) that you want to delete:\nSpace to select, Enter to confirm.")
+        .with_prompt(
+            "Select the note(s) that you want to delete:\nSpace to select, Enter to confirm.",
+        )
         .items(&options)
         .interact()
         .unwrap();
@@ -128,6 +136,14 @@ fn delete_notes() -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
+fn display_about() -> Result<(), Box<dyn std::error::Error>> {
+    println!("Notabena is a FOSS note-taking CLI tool, written in Rust.");
+    println!("License: GPL v3\n");
+    println!("COPYRIGHT (c) 2023 NOTABENA ORGANISATION\nPROJECT LEADS @ThatFrogDev, @MrSerge01, GITHUB CONTRIBUTORS");
+
+    Ok(())
+}
+
 fn display_note(note: &Note) -> Result<(), Box<dyn std::error::Error>> {
     println!("=======================");
     println!("Name: {}", note.name);
@@ -145,7 +161,10 @@ fn truncated_note(options: &mut Vec<String>) -> Result<(), Box<dyn std::error::E
             truncated_content = truncated_content + "...";
         }
 
-        options.push(format!("{} | {} | {}", note.name, truncated_content, note.created));
+        options.push(format!(
+            "{} | {} | {}",
+            note.name, truncated_content, note.created
+        ));
     })
 }
 
@@ -161,19 +180,30 @@ fn cursor_to_origin() -> Result<(), Box<dyn std::error::Error>> {
 
 fn confirm_prompt(prompt: &str) -> bool {
     Confirm::with_theme(&ColorfulTheme::default())
-        .with_prompt(prompt).default(true).interact().unwrap()
+        .with_prompt(prompt)
+        .default(true)
+        .interact()
+        .unwrap()
 }
 
 fn select<T: AsRef<str> + std::fmt::Display>(prompt: &str, options: &[T]) -> usize {
     Select::with_theme(&ColorfulTheme::default())
-        .with_prompt(prompt).items(&options).interact().unwrap()
+        .with_prompt(prompt)
+        .items(&options)
+        .interact()
+        .unwrap()
 }
 
 fn input(prompt: &str, initial_text: String) -> String {
     match initial_text.as_str() {
         "" => Input::with_theme(&ColorfulTheme::default())
-            .with_prompt(prompt).interact_text().unwrap(),
+            .with_prompt(prompt)
+            .interact_text()
+            .unwrap(),
         _ => Input::with_theme(&ColorfulTheme::default())
-            .with_prompt(prompt).with_initial_text(initial_text).interact_text().unwrap()
+            .with_prompt(prompt)
+            .with_initial_text(initial_text)
+            .interact_text()
+            .unwrap(),
     }
 }

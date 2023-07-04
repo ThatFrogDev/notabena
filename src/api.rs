@@ -43,7 +43,10 @@ pub fn edit_note(note: &Note, idx: usize) -> Result<()> {
 pub fn delete_notes(idx: Vec<usize>) -> Result<()> {
     let sqlite = Connection::open("notes.db")?;
     for identifier in idx {
-        sqlite.execute("DELETE FROM saved_notes WHERE id = ?1;", params![&identifier])?;
+        sqlite.execute(
+            "DELETE FROM saved_notes WHERE id = ?1;",
+            params![&identifier],
+        )?;
     }
 
     Ok(())
