@@ -160,7 +160,10 @@ fn display_note(note: &Note) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn truncated_note(options: &mut Vec<String>, db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+fn truncated_note(
+    options: &mut Vec<String>,
+    db_file: &PathBuf,
+) -> Result<(), Box<dyn std::error::Error>> {
     Ok(for note in &api::get_notes(db_file)? {
         let mut truncated_content: String = note.content.chars().take(10).collect();
         if truncated_content.chars().count() == 10 {
