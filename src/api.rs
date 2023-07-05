@@ -7,9 +7,7 @@ pub fn init_db(
     data_directory: &PathBuf,
     db_file: &PathBuf,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    if File::open(&db_file).is_ok() {
-        println!("Database file already exists at {:?}", &db_file);
-    } else {
+    if !File::open(&db_file).is_ok() {
         let notabena_directory = data_directory
             .parent()
             .unwrap()
@@ -17,10 +15,8 @@ pub fn init_db(
             .join("Notabena");
 
         println!("{:?}", &notabena_directory);
-
         fs::create_dir_all(&notabena_directory)?;
         File::create(&db_file)?;
-        println!("Created database file at {:?}", &db_file);
     }
 
     Connection::open(&db_file)?.execute(

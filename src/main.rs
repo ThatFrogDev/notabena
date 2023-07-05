@@ -3,9 +3,15 @@ pub mod api;
 
 use async_std::path::PathBuf;
 use chrono::prelude::*;
+use crossterm::{
+    execute,
+    event::{read, Event, KeyCode, KeyEvent, KeyModifiers, KeyEventKind, KeyEventState},
+    terminal::{disable_raw_mode, enable_raw_mode, Clear, ClearType},
+    style::{Print, Color, SetAttributes, Attributes}
+};
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, MultiSelect, Select};
 use directories::BaseDirs;
-use std::process::Command;
+use std::{process::Command, io::stdout};
 
 pub struct Note {
     id: usize,
@@ -18,7 +24,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data_directory: PathBuf = BaseDirs::new().unwrap().config_dir().into();
     let db_file = data_directory.join("Notabena").join("notes.db");
     api::init_db(&data_directory, &db_file)?;
-    cursor_to_origin()?;
+    quit()?;
     println!("Welcome to Notabena!");
 
     loop {
@@ -43,6 +49,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn new_note(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+    quit()?;
     let inputted_note = Note {
         id: api::get_notes(&db_file)?.len(),
         name: input("Name:", "".to_string()),
@@ -50,8 +57,7 @@ fn new_note(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         created: format!("{}", Local::now().format("%A %e %B, %H:%M")),
     };
 
-    cursor_to_origin()?;
-    println!("This is the note you're about to create:");
+    execute!(stdout(), Print("This is the note you're about to create:\n")).unwrap();
     display_note(&inputted_note)?;
 
     return match confirm_prompt("Do you want to save this note?") {
@@ -214,5 +220,20 @@ fn input(prompt: &str, initial_text: String) -> String {
             .with_initial_text(initial_text)
             .interact_text()
             .unwrap(),
+    }
+}
+
+fn quit() -> Result<(), Box<dyn std::error::Error>> {
+
+    loop {
+        match read().unwrap() {
+            Event::Key(KeyEvent {
+                code: KeyCode::Char('q'),
+                modifiers: KeyModifiers::ALT,
+                kind: KeyEventKind::Release,
+                state: _,
+            }) => return Ok(()),
+            _ => return Ok(()),
+        };
     }
 }
