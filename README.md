@@ -28,3 +28,10 @@ You can help us in different ways.<br>
 🧹 ・ Fix issues: Are you a Rust developer and interested in the project: try to fix the issues and open a pull request! (Especially the ones tagged with `good first issue`)
 
 **Contributing guidelines** for these three roles coming soon!
+
+## Linux Installation Notes
+When running Notabena on Linux, you might encounter an error like this:<br>
+`bash: /home/Your-Username/Downloads/Your-Notabena-Installation: Permission denied`<br>
+To fix this issue, run the following command:<br>
+`chmod u+x /home/Your-Username/Downloads/Your-Notabena-Installation` (filling in the blanks)<br>
+The program should now run smoothly!
