@@ -1,24 +1,22 @@
 // TODO: Organize the code into different files
-pub mod api;
+mod api;
+mod note;
+mod clean;
+mod output;
+mod prompts;
 
+use crate::note::Note;
 use async_std::path::PathBuf;
 use chrono::prelude::*;
 use crossterm::{
+    event::{read, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers},
     execute,
-    event::{read, Event, KeyCode, KeyEvent, KeyModifiers, KeyEventKind, KeyEventState},
-    terminal::{disable_raw_mode, enable_raw_mode, Clear, ClearType},
-    style::{Print, Color, SetAttributes, Attributes}
+    style::Print,
+    terminal::{Clear, ClearType},
 };
 use dialoguer::{theme::ColorfulTheme, Confirm, Input, MultiSelect, Select};
 use directories::BaseDirs;
-use std::{process::Command, io::stdout};
-
-pub struct Note {
-    id: usize,
-    name: String,
-    content: String,
-    created: String,
-}
+use std::{io::stdout, process::Command};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data_directory: PathBuf = BaseDirs::new().unwrap().config_dir().into();
@@ -57,7 +55,11 @@ fn new_note(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         created: format!("{}", Local::now().format("%A %e %B, %H:%M")),
     };
 
-    execute!(stdout(), Print("This is the note you're about to create:\n")).unwrap();
+    execute!(
+        stdout(),
+        Print("This is the note you're about to create:\n")
+    )
+    .unwrap();
     display_note(&inputted_note)?;
 
     return match confirm_prompt("Do you want to save this note?") {
@@ -224,16 +226,14 @@ fn input(prompt: &str, initial_text: String) -> String {
 }
 
 fn quit() -> Result<(), Box<dyn std::error::Error>> {
+    execute!(stdout(), Clear(ClearType::Purge)).unwrap();
 
     loop {
-        match read().unwrap() {
-            Event::Key(KeyEvent {
-                code: KeyCode::Char('q'),
-                modifiers: KeyModifiers::ALT,
-                kind: KeyEventKind::Release,
-                state: _,
-            }) => return Ok(()),
-            _ => return Ok(()),
-        };
+        Event::Key(KeyEvent::new_with_kind(
+            KeyCode::Char('q'),
+            KeyModifiers::ALT,
+            KeyEventKind::Release,
+        ));
+        return Ok(());
     }
 }

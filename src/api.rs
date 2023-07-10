@@ -1,4 +1,4 @@
-use crate::Note;
+use crate::note::Note;
 use async_std::path::PathBuf;
 use rusqlite::{params, Connection, Result};
 use std::fs::{self, File};
