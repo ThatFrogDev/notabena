@@ -1,11 +1,9 @@
-use dialoguer::{Select, theme::ColorfulTheme};
+use dialoguer::{theme::ColorfulTheme, Select};
 
-fn select<T: AsRef<str> + std::fmt::Display>(prompt: &str, options: &[T]) -> usize {
+pub fn select<T: AsRef<str> + std::fmt::Display>(prompt: &str, options: &[T]) -> usize {
     Select::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
-        .items(&options)
+        .items(options)
         .interact()
         .unwrap()
 }
-// iaslhdjkwiaje
-// 

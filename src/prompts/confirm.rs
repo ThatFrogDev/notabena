@@ -1,6 +1,6 @@
-use dialoguer::{Confirm, theme::ColorfulTheme};
+use dialoguer::{theme::ColorfulTheme, Confirm};
 
-fn confirm(prompt: &str) -> bool {
+pub fn confirm(prompt: &str) -> bool {
     Confirm::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
         .default(true)

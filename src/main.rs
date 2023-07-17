@@ -1,28 +1,23 @@
 // TODO: Organize the code into different files
 mod api;
-mod note;
 mod clean;
+mod database;
+mod note;
 mod output;
 mod prompts;
 
 use crate::note::Note;
+use crate::prompts::{confirm::confirm, input::input, multiselect::multiselect, select::select};
 use async_std::path::PathBuf;
 use chrono::prelude::*;
-use crossterm::{
-    event::{read, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers},
-    execute,
-    style::Print,
-    terminal::{Clear, ClearType},
-};
-use dialoguer::{theme::ColorfulTheme, Confirm, Input, MultiSelect, Select};
 use directories::BaseDirs;
-use std::{io::stdout, process::Command};
+use std::process::Command;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data_directory: PathBuf = BaseDirs::new().unwrap().config_dir().into();
     let db_file = data_directory.join("Notabena").join("notes.db");
     api::init_db(&data_directory, &db_file)?;
-    quit()?;
+    cursor_to_origin()?;
     println!("Welcome to Notabena!");
 
     loop {
@@ -47,22 +42,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn new_note(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-    quit()?;
     let inputted_note = Note {
-        id: api::get_notes(&db_file)?.len(),
+        id: api::get_notes(db_file)?.len(),
         name: input("Name:", "".to_string()),
         content: input("Content:", "".to_string()),
         created: format!("{}", Local::now().format("%A %e %B, %H:%M")),
     };
 
-    execute!(
-        stdout(),
-        Print("This is the note you're about to create:\n")
-    )
-    .unwrap();
+    cursor_to_origin()?;
+    println!("This is the note you're about to create:");
     display_note(&inputted_note)?;
 
-    return match confirm_prompt("Do you want to save this note?") {
+    match confirm("Do you want to save this note?") {
         true => {
             api::save_note(&inputted_note, db_file)?;
             cursor_to_origin()?;
@@ -70,7 +61,7 @@ fn new_note(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
             Ok(())
         }
         false => Ok(()),
-    };
+    }
 }
 
 fn show_notes(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
@@ -78,15 +69,15 @@ fn show_notes(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
 
     if saved_notes.is_empty() {
         println!("You don't have any notes.");
-        return Ok(());
+        Ok(())
     } else {
         let mut options: Vec<String> = Vec::new();
         truncated_note(&mut options, db_file)?;
         let selection = select("Select the note that you want to view:", &options);
         let selected_note = &saved_notes[selection];
-        display_note(&selected_note)?;
+        display_note(selected_note)?;
 
-        return Ok(());
+        Ok(())
     }
 }
 
@@ -99,7 +90,7 @@ fn edit_notes(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     if saved_notes.is_empty() {
         cursor_to_origin()?;
         println!("You can't edit notes, because there are none.");
-        return Ok(());
+        Ok(())
     } else {
         let selected_note = &saved_notes[selection];
         let updated_note = Note {
@@ -109,7 +100,7 @@ fn edit_notes(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
             created: selected_note.created.clone(),
         };
 
-        return match confirm_prompt("Are you sure that you want to edit this note?") {
+        match confirm("Are you sure that you want to edit this note?") {
             true => {
                 api::edit_note(&updated_note, selection, db_file)?;
                 cursor_to_origin()?;
@@ -117,20 +108,17 @@ fn edit_notes(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
                 Ok(())
             }
             false => Ok(()),
-        };
+        }
     }
 }
 
 fn delete_notes(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     let mut options: Vec<String> = Vec::new();
     truncated_note(&mut options, db_file)?;
-    let selections = MultiSelect::with_theme(&ColorfulTheme::default())
-        .with_prompt(
-            "Select the note(s) that you want to delete:\nSpace to select, Enter to confirm.",
-        )
-        .items(&options)
-        .interact()
-        .unwrap();
+    let selections = multiselect(
+        "Select the note(s) that you want to delete:\nSpace to select, Enter to confirm.",
+        options,
+    );
 
     let mut prompt = "Are you sure that you want to delete these notes?";
     if selections.len() == 1 {
@@ -140,9 +128,12 @@ fn delete_notes(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     cursor_to_origin()?;
     if api::get_notes(db_file)?.is_empty() {
         println!("You can't delete notes, because there are none.");
+        Ok(())
+    } else if selections.is_empty() {
+        println!("You didn't select any notes.");
         return Ok(());
     } else {
-        if confirm_prompt(prompt) {
+        if confirm(prompt) {
             api::delete_notes(selections, db_file)?;
         }
         println!("Notes deleted successfully.");
@@ -172,17 +163,18 @@ fn truncated_note(
     options: &mut Vec<String>,
     db_file: &PathBuf,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    Ok(for note in &api::get_notes(db_file)? {
+    for note in &api::get_notes(db_file)? {
         let mut truncated_content: String = note.content.chars().take(10).collect();
         if truncated_content.chars().count() == 10 {
-            truncated_content = truncated_content + "...";
+            truncated_content += "...";
         }
 
         options.push(format!(
             "{} | {} | {}",
             note.name, truncated_content, note.created
         ));
-    })
+    }
+    Ok(())
 }
 
 fn cursor_to_origin() -> Result<(), Box<dyn std::error::Error>> {
@@ -192,48 +184,5 @@ fn cursor_to_origin() -> Result<(), Box<dyn std::error::Error>> {
     } else {
         Command::new("clear").spawn()?.wait()?;
         Ok(())
-    }
-}
-
-fn confirm_prompt(prompt: &str) -> bool {
-    Confirm::with_theme(&ColorfulTheme::default())
-        .with_prompt(prompt)
-        .default(true)
-        .interact()
-        .unwrap()
-}
-
-fn select<T: AsRef<str> + std::fmt::Display>(prompt: &str, options: &[T]) -> usize {
-    Select::with_theme(&ColorfulTheme::default())
-        .with_prompt(prompt)
-        .items(&options)
-        .interact()
-        .unwrap()
-}
-
-fn input(prompt: &str, initial_text: String) -> String {
-    match initial_text.as_str() {
-        "" => Input::with_theme(&ColorfulTheme::default())
-            .with_prompt(prompt)
-            .interact_text()
-            .unwrap(),
-        _ => Input::with_theme(&ColorfulTheme::default())
-            .with_prompt(prompt)
-            .with_initial_text(initial_text)
-            .interact_text()
-            .unwrap(),
-    }
-}
-
-fn quit() -> Result<(), Box<dyn std::error::Error>> {
-    execute!(stdout(), Clear(ClearType::Purge)).unwrap();
-
-    loop {
-        Event::Key(KeyEvent::new_with_kind(
-            KeyCode::Char('q'),
-            KeyModifiers::ALT,
-            KeyEventKind::Release,
-        ));
-        return Ok(());
     }
 }

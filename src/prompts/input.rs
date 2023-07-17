@@ -1,6 +1,6 @@
-use dialoguer::{Input, theme::ColorfulTheme};
+use dialoguer::{theme::ColorfulTheme, Input};
 
-fn input(prompt: &str, initial_text: String) -> String {
+pub fn input(prompt: &str, initial_text: String) -> String {
     match initial_text.as_str() {
         "" => Input::with_theme(&ColorfulTheme::default())
             .with_prompt(prompt)
