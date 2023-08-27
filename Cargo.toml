@@ -8,7 +8,7 @@ description = "[PREVIEW] A work-in-progress note-taking app for the command line
 homepage = "https://github.com/thatfrogdev/notabena"
 repository = "https://github.com/thatfrogdev/notabena"
 readme = "README.md"
-keywords = [ "notes", "cli", "gui", "markdown"]
+keywords = [ "notes", "cli", "gui", "markdown" ]
 categories = [ "command-line-utilities", "gui", "text-processing" ]
 
 [dependencies]
@@ -16,4 +16,6 @@ async-std = "1.12.0"
 directories = "5.0.1"
 chrono = "0.4.26"
 dialoguer = "0.10.4"
+inquire = "0.6.2"
+crossterm = "0.26.1"
 rusqlite = { version = "0.29.0", features = ["bundled"] }

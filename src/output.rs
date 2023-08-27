@@ -1,0 +1,3 @@
+struct Output;
+
+impl Output {}
