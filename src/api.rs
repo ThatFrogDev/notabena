@@ -8,14 +8,7 @@ pub fn init_db(
     db_file: &PathBuf,
 ) -> Result<(), Box<dyn std::error::Error>> {
     if File::open(db_file).is_err() {
-        let notabena_directory = data_directory
-            .parent()
-            .unwrap()
-            .to_path_buf()
-            .join("Notabena");
-
-        println!("{:?}", &notabena_directory);
-        fs::create_dir_all(&notabena_directory)?;
+        fs::create_dir_all(data_directory.join("Notabena"))?;
         File::create(db_file)?;
     }
 
@@ -36,17 +29,6 @@ pub fn save_note(note: &Note, db_file: &PathBuf) -> Result<()> {
     Connection::open(db_file)?.execute(
         "INSERT INTO saved_notes (id, name, content, created) VALUES (?1, ?2, ?3, ?4);",
         params![&note.id, &note.name, &note.content, &note.created],
-    )?;
-
-    Ok(())
-}
-
-pub fn edit_note(note: &Note, idx: usize, db_file: &PathBuf) -> Result<()> {
-    Connection::open(db_file)?.execute(
-        "UPDATE saved_notes
-            SET (name) = ?1, (content) = ?2
-            WHERE id = ?3;",
-        params![&note.name, &note.content, &idx],
     )?;
 
     Ok(())

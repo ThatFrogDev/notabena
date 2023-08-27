@@ -1,4 +1,4 @@
-mod create_note;
-mod delete_note;
-mod edit_note;
-mod show_note;
+pub mod display;
+pub mod edit;
+pub mod get_notes;
+pub mod show;

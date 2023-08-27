@@ -8,7 +8,7 @@ description = "[PREVIEW] A work-in-progress note-taking app for the command line
 homepage = "https://github.com/thatfrogdev/notabena"
 repository = "https://github.com/thatfrogdev/notabena"
 readme = "README.md"
-keywords = [ "notes", "cli", "gui", "markdown"]
+keywords = [ "notes", "cli", "gui", "markdown" ]
 categories = [ "command-line-utilities", "gui", "text-processing" ]
 
 [dependencies]
