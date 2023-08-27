@@ -1,4 +1,3 @@
-// TODO: Organize the code into different files
 mod api;
 mod clean;
 mod database;
