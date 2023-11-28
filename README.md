@@ -14,7 +14,7 @@ These are our current planned features. (Most features under CLI are also featur
     - [x] Delete multiple notes at once
   - [x] Local SQL database
   - [ ] Encrypted notes
-  - [ ] Simple Markdown support
+  - [x] Simple Markdown support
   - [ ] Compatibility with the GUI
 - [ ] GUI
   - [ ] Custom themes
