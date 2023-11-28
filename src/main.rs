@@ -39,8 +39,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             4 => display_about().expect("Viewing about failed"),
             _ => {
                 cursor_to_origin()?;
-                return Ok(())
-            },
+                return Ok(());
+            }
         }
 
         /*if return_to_main().is_ok() {

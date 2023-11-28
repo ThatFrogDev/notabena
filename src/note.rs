@@ -48,7 +48,7 @@ impl Note {
             false => {
                 cursor_to_origin()?;
                 Ok(())
-            },
+            }
         }
     }
 

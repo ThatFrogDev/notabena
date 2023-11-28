@@ -1,6 +1,6 @@
+use crossterm::event;
 use crossterm::event::{Event, KeyCode, KeyEvent};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
-use crossterm::event;
 use std::time::Duration;
 
 pub fn return_to_main() -> Result<(), Box<dyn std::error::Error>> {
