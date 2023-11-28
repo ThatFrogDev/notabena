@@ -1,8 +1,9 @@
-# Notabena
+![Banner](/static/banner.png)
+
 ![CI checks](https://github.com/thatfrogdev/notabena/actions/workflows/ci-checks.yml/badge.svg) ![crates.io](https://img.shields.io/crates/v/notabena.svg)
 
 ## About
-Notabena is the free and open source note-taking app, written in pure Rust.
+Notabena is a free and open source note-taking app, written in pure Rust. [Join our Discord here!](https://discord.gg/htNK4YcJB8)
 
 ## Features
 These are our current planned features. (Most features under CLI are also featured in the GUI when it's released, for the two are planned to be fully compatible)
