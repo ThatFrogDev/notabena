@@ -1,5 +1,5 @@
 use termimad::*;
 
-pub fn format_md<'a>(skin: &'a MadSkin, string: &'a str) -> FmtInline<'a, 'a> {
+pub fn format_md<'sk, 'st>(skin: &'sk MadSkin, string: &'st str) -> FmtInline<'sk, 'st> {
     return skin.inline(string);
 }
