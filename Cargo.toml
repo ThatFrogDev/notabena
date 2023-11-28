@@ -2,7 +2,7 @@
 name = "notabena"
 version = "0.1.0-preview"
 edition = "2021"
-authors = [ "Mart Zielman", "MrSerge01" ]
+authors = [ "ThatFrogDev", "MrSerge01" ]
 license-file = "LICENSE.md"
 description = "[PREVIEW] A work-in-progress note-taking app for the command line. GUI support will be added (see README)."
 homepage = "https://github.com/thatfrogdev/notabena"
@@ -19,3 +19,4 @@ dialoguer = "0.11.0"
 inquire = "0.6.2"
 crossterm = "0.27.0"
 rusqlite = { version = "0.30.0", features = ["bundled"] }
+termimad = "0.26.1"

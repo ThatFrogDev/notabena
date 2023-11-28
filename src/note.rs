@@ -8,6 +8,7 @@ use async_std::path::PathBuf;
 use chrono::prelude::Local;
 use rusqlite::{params, Connection};
 
+#[derive(Clone)]
 pub struct Note {
     pub id: usize,
     pub name: String,
@@ -17,7 +18,7 @@ pub struct Note {
 
 impl Note {
     pub fn create(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-        let inputted_note = Note {
+        let mut inputted_note = Note {
             id: get_notes(db_file)?.len(),
             name: input("Name:", "".to_string()),
             content: input("Content:", "".to_string()),
@@ -26,7 +27,7 @@ impl Note {
 
         cursor_to_origin()?;
         println!("This is the note you're about to create:");
-        display(&inputted_note)?;
+        display(&mut inputted_note)?;
 
         match confirm("Do you want to save this note?") {
             true => {
@@ -44,7 +45,10 @@ impl Note {
                 println!("Note created successfully.");
                 Ok(())
             }
-            false => Ok(()),
+            false => {
+                cursor_to_origin()?;
+                Ok(())
+            },
         }
     }
 
@@ -59,9 +63,9 @@ impl Note {
         let mut options: Vec<String> = Vec::new();
         truncated_note(&mut options, db_file)?;
         let selection = select("Select the note that you want to view:", &options);
-        let selected_note = &saved_notes[selection];
+        let mut selected_note = &saved_notes[selection];
 
-        display(selected_note)?;
+        display(&mut selected_note)?;
         Ok(())
     }
 

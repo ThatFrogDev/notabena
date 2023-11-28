@@ -1,3 +1,0 @@
-struct Output;
-
-impl Output {}

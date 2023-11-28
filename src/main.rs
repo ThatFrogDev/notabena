@@ -1,14 +1,14 @@
 mod api;
-mod clean;
 mod database;
 mod note;
-mod output;
 mod prompts;
+mod return_to_main;
 
 use crate::{
     database::display::display,
     note::Note,
     prompts::{confirm::confirm, multiselect::multiselect, select::select},
+    /* return_to_main::return_to_main, */
 };
 use async_std::path::PathBuf;
 use directories::BaseDirs;
@@ -37,8 +37,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             2 => Note::edit(&db_file).expect("Editing the note failed"),
             3 => delete_notes(&db_file).expect("Deleting the note failed"),
             4 => display_about().expect("Viewing about failed"),
-            _ => return Ok(()),
+            _ => {
+                cursor_to_origin()?;
+                return Ok(())
+            },
         }
+
+        /*if return_to_main().is_ok() {
+            main()?;
+        }*/
     }
 }
 
@@ -53,9 +60,9 @@ fn show_notes(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     let mut options: Vec<String> = Vec::new();
     truncated_note(&mut options, db_file)?;
     let selection = select("Select the note that you want to view:", &options);
-    let selected_note = &saved_notes[selection];
+    let selected_note = saved_notes[selection].clone();
 
-    display(selected_note)?;
+    display(&selected_note)?;
     Ok(())
 }
 
@@ -91,7 +98,7 @@ fn delete_notes(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
 fn display_about() -> Result<(), Box<dyn std::error::Error>> {
     println!("Notabena is a FOSS note-taking CLI tool, written in Rust.");
     println!("License: GPL v3\n");
-    println!("COPYRIGHT (c) 2023 NOTABENA ORGANISATION\nPROJECT LEADS @ThatFrogDev, @MrSerge01, GITHUB CONTRIBUTORS");
+    println!("COPYRIGHT (c) 2023 NOTABENA ORGANISATION\nPROJECT LEADS @ThatFrogDev, @MrSerge01, GITHUB CONTRIBUTORS\n");
 
     Ok(())
 }
