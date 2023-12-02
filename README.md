@@ -36,7 +36,10 @@ To install Notabena on **Windows**, simply run the file!
 When running Notabena on **Linux or macOS**, you might encounter an error like this when running the file:<br>
 `bash: /home/Your-Username/Downloads/Your-Notabena-Installation: Permission denied`<br>
 To fix this issue, **run the following command in your terminal:**<br>
+Linux:
 `chmod u+x /home/Your-Username/Downloads/Your-Notabena-Installation` (filling in the blanks)<br>
+MacOS:
+`chmod u+x /Users/Your-Username/Downloads/Your-Notabena-Installation` (filling in the blanks)<br>
 The program should now run smoothly!<br>
 
 These are currently the only known errors during the installation of Notabena.
