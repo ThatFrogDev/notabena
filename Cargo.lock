@@ -749,7 +749,7 @@ dependencies = [
 
 [[package]]
 name = "notabena"
-version = "0.1.0-preview"
+version = "0.1.0"
 dependencies = [
  "async-std",
  "chrono",
