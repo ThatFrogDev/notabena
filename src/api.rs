@@ -1,14 +1,18 @@
-use crate::Note;
+use crate::note::Note;
+use async_std::path::PathBuf;
 use rusqlite::{params, Connection, Result};
-use std::fs::File;
+use std::fs::{self, File};
 
-pub fn init_db() -> Result<()> {
-    if !File::open("notes.db").is_ok() {
-        File::create("notes.db").expect("Failed to initiate the database.");
+pub fn init_db(
+    data_directory: &PathBuf,
+    db_file: &PathBuf,
+) -> Result<(), Box<dyn std::error::Error>> {
+    if File::open(db_file).is_err() {
+        fs::create_dir_all(data_directory.join("Notabena"))?;
+        File::create(db_file)?;
     }
-    let sqlite = Connection::open("notes.db")?;
 
-    sqlite.execute(
+    Connection::open(db_file)?.execute(
         "CREATE TABLE IF NOT EXISTS saved_notes (
                 id INTEGER NOT NULL,
                 name TEXT NOT NULL,
@@ -21,10 +25,8 @@ pub fn init_db() -> Result<()> {
     Ok(())
 }
 
-pub fn save_note(note: &Note) -> Result<()> {
-    let sqlite = Connection::open("notes.db")?;
-
-    sqlite.execute(
+pub fn save_note(note: &Note, db_file: &PathBuf) -> Result<()> {
+    Connection::open(db_file)?.execute(
         "INSERT INTO saved_notes (id, name, content, created) VALUES (?1, ?2, ?3, ?4);",
         params![&note.id, &note.name, &note.content, &note.created],
     )?;
@@ -32,30 +34,20 @@ pub fn save_note(note: &Note) -> Result<()> {
     Ok(())
 }
 
-pub fn edit_note(note: &Note, idx: usize) -> Result<()> {
-    let sqlite = Connection::open("notes.db")?;
-
-    sqlite.execute(
-        "UPDATE saved_notes
-            SET (name) = ?1, (content) = ?2
-            WHERE id = ?3;
-            ",
-        params![&note.name, &note.content, &idx],
-    )?;
+pub fn delete_notes(idx: Vec<usize>, db_file: &PathBuf) -> Result<()> {
+    let sqlite = Connection::open(db_file)?;
+    for identifier in idx {
+        sqlite.execute(
+            "DELETE FROM saved_notes WHERE id = ?1;",
+            params![&identifier],
+        )?;
+    }
 
     Ok(())
 }
 
-pub fn delete_note(idx: usize) -> Result<()> {
-    let sqlite = Connection::open("notes.db")?;
-
-    sqlite.execute("DELETE FROM saved_notes WHERE id = ?1;", params![&idx])?;
-
-    Ok(())
-}
-
-pub fn get_notes() -> Result<Vec<Note>> {
-    let sqlite = Connection::open("notes.db")?;
+pub fn get_notes(db_file: &PathBuf) -> Result<Vec<Note>> {
+    let sqlite = Connection::open(db_file)?;
 
     let mut stmt = sqlite.prepare("SELECT id, name, content, created FROM saved_notes;")?;
     let note_iter = stmt.query_map((), |row| {

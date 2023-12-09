@@ -1,212 +1,132 @@
-// TODO: Organize the code into different files
-pub mod api;
+mod api;
+mod database;
+mod note;
+mod prompts;
+mod return_to_main;
 
-use chrono::prelude::*;
-use dialoguer::{theme::ColorfulTheme, Confirm, Input, MultiSelect, Select};
-
-pub struct Note {
-    id: usize,
-    name: String,
-    content: String,
-    created: String,
-}
+use crate::{
+    database::display::display,
+    note::Note,
+    prompts::{confirm::confirm, multiselect::multiselect, select::select},
+    /* return_to_main::return_to_main, */
+};
+use async_std::path::PathBuf;
+use directories::BaseDirs;
+use std::process::Command;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    api::init_db()?;
-    println!("Welcome to Notabena, the FOSS note-taking app.");
+    let data_directory: PathBuf = BaseDirs::new().unwrap().config_dir().into();
+    let db_file = data_directory.join("Notabena").join("notes.db");
+    api::init_db(&data_directory, &db_file)?;
+    cursor_to_origin()?;
+    println!("Welcome to Notabena!");
 
     loop {
-        //cursor_to_origin();
+        let options = vec![
+            "New note",
+            "View note",
+            "Edit note",
+            "Delete note",
+            "About",
+            "Exit",
+        ];
 
-        let options = vec!["New note", "View note", "Edit note", "Delete note", "Exit"];
-        let select = Select::with_theme(&ColorfulTheme::default())
-            .with_prompt("What do you want to do?")
-            .items(&options)
-            .interact()
-            .unwrap();
-
-        match select {
-            0 => {
-                new_note().expect("Creating a new note failed");
-                //cursor_to_origin();
-            }
-            1 => {
-                show_notes()?;
-                //cursor_to_origin();
-            }
-            2 => {
-                edit_notes().expect("Editing the note failed");
-                //cursor_to_origin();
-            }
-            3 => {
-                delete_notes().expect("Deleting the note failed");
-                //cursor_to_origin();
-            }
+        match select("What do you want to do?", &options) {
+            0 => Note::create(&db_file).expect("Creating a new note failed"),
+            1 => show_notes(&db_file).expect("Failed fetching the notes"),
+            2 => Note::edit(&db_file).expect("Editing the note failed"),
+            3 => delete_notes(&db_file).expect("Deleting the note failed"),
+            4 => display_about().expect("Viewing about failed"),
             _ => {
+                cursor_to_origin()?;
                 return Ok(());
             }
         }
+
+        /*if return_to_main().is_ok() {
+            main()?;
+        }*/
     }
 }
 
-fn new_note() -> Result<(), Box<dyn std::error::Error>> {
-    let saved_notes = api::get_notes()?;
-    let inputted_note = Note {
-        id: saved_notes.len(),
-        name: Input::with_theme(&ColorfulTheme::default())
-            .with_prompt("Name:")
-            .interact_text()
-            .unwrap(),
-        content: Input::with_theme(&ColorfulTheme::default())
-            .with_prompt("Content:")
-            .interact_text()
-            .unwrap(),
-        created: format!("{}", Local::now().format("%A %e %B, %H:%M")),
-    };
+fn show_notes(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+    let saved_notes = api::get_notes(db_file)?;
 
-    //cursor_to_origin();
-    println!("This is the note you're about to create:");
-    display_note(&inputted_note);
-
-    let save_note_bool = Confirm::with_theme(&ColorfulTheme::default())
-        .with_prompt("Do you want to save this note?")
-        .default(true)
-        .interact()
-        .unwrap();
-
-    return match save_note_bool {
-        true => {
-            api::save_note(&inputted_note)?;
-            println!("Note created successfully.");
-            Ok(())
-        }
-        false => Ok(()),
-    };
-}
-
-fn show_notes() -> Result<(), Box<dyn std::error::Error>> {
-    let saved_notes = api::get_notes()?;
     if saved_notes.is_empty() {
         println!("You don't have any notes.");
         return Ok(());
-    } else {
-        let mut options: Vec<String> = Vec::new();
-        truncated_note(&mut options)?;
-        let selection = Select::with_theme(&ColorfulTheme::default())
-            .with_prompt("Select the note that you want to view:")
-            .items(&options)
-            .interact()
-            .unwrap();
-
-        let selected_note = &saved_notes[selection];
-        display_note(selected_note);
-        return Ok(());
     }
+
+    let mut options: Vec<String> = Vec::new();
+    truncated_note(&mut options, db_file)?;
+    let selection = select("Select the note that you want to view:", &options);
+    let selected_note = saved_notes[selection].clone();
+
+    display(&selected_note)?;
+    Ok(())
 }
 
-fn edit_notes() -> Result<(), Box<dyn std::error::Error>> {
-    let saved_notes = api::get_notes()?;
+fn delete_notes(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
     let mut options: Vec<String> = Vec::new();
-    truncated_note(&mut options)?;
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt("Select the note that you want to edit:")
-        .items(&options)
-        .interact()
-        .unwrap();
+    truncated_note(&mut options, db_file)?;
+    let selections = multiselect(
+        "Select the note(s) that you want to delete:\nSpace to select, Enter to confirm.",
+        options,
+    );
 
-    if api::get_notes()?.is_empty() {
-        println!("You can't edit notes, because there are none.");
-        return Ok(());
-    } else {
-        let selected_note = &saved_notes[selection];
-        let updated_note = Note {
-            id: selection,
-            name: Input::with_theme(&ColorfulTheme::default())
-                .with_prompt("New name:")
-                .with_initial_text(selected_note.name.clone())
-                .interact_text()
-                .unwrap(),
-            content: Input::with_theme(&ColorfulTheme::default())
-                .with_prompt("New content:")
-                .with_initial_text(selected_note.content.clone())
-                .interact_text()
-                .unwrap(),
-            created: selected_note.created.clone(),
-        };
-
-        let edit_note_bool = Confirm::with_theme(&ColorfulTheme::default())
-            .with_prompt("Are you sure that you want to edit this note?")
-            .default(true)
-            .interact()
-            .unwrap();
-
-        return match edit_note_bool {
-            true => {
-                api::edit_note(&updated_note, selection)?;
-                println!("Note updated successfully.");
-                Ok(())
-            }
-            false => Ok(()),
-        };
+    let mut prompt = "Are you sure that you want to delete these notes?";
+    if selections.len() == 1 {
+        prompt = "Are you sure that you want to delete this note?";
     }
-}
 
-// TODO: make an if statement to check if there are multiple or only one note selected
-fn delete_notes() -> Result<(), Box<dyn std::error::Error>> {
-    let mut options: Vec<String> = Vec::new();
-    truncated_note(&mut options)?;
-    let selections = MultiSelect::with_theme(&ColorfulTheme::default())
-        .with_prompt(
-            "Select the note(s) that you want to delete:\nSpace to select, Enter to confirm.",
-        )
-        .items(&options)
-        .interact()
-        .unwrap();
-
-    let delete_note_bool = Confirm::with_theme(&ColorfulTheme::default())
-        .with_prompt("Are you sure that you want to delete these note(s)?")
-        .default(true)
-        .interact()
-        .unwrap();
-
-    if api::get_notes()?.is_empty() {
+    cursor_to_origin()?;
+    if api::get_notes(db_file)?.is_empty() {
         println!("You can't delete notes, because there are none.");
+        Ok(())
+    } else if selections.is_empty() {
+        println!("You didn't select any notes.");
         return Ok(());
     } else {
-        for selection in selections {
-            if delete_note_bool {
-                api::delete_note(selection)?;
-            }
+        if confirm(prompt) {
+            api::delete_notes(selections, db_file)?;
         }
         println!("Notes deleted successfully.");
         return Ok(());
     }
 }
 
-fn display_note(note: &Note) {
-    println!("=======================");
-    println!("Name: {}", note.name);
-    println!("Content: {}", note.content);
-    println!("Created at: {}", note.created);
-    println!("=======================");
+fn display_about() -> Result<(), Box<dyn std::error::Error>> {
+    println!("Notabena is a FOSS note-taking CLI tool, written in Rust.");
+    println!("License: GPL v3\n");
+    println!("COPYRIGHT (c) 2023 NOTABENA ORGANISATION\nPROJECT LEADS @ThatFrogDev, @MrSerge01, GITHUB CONTRIBUTORS\n");
+
+    Ok(())
 }
 
-fn truncated_note(options: &mut Vec<String>) -> Result<(), Box<dyn std::error::Error>> {
-    Ok(for note in &api::get_notes()? {
+fn truncated_note(
+    options: &mut Vec<String>,
+    db_file: &PathBuf,
+) -> Result<(), Box<dyn std::error::Error>> {
+    for note in &api::get_notes(db_file)? {
         let mut truncated_content: String = note.content.chars().take(10).collect();
-
         if truncated_content.chars().count() == 10 {
-            truncated_content = truncated_content + "...";
+            truncated_content += "...";
         }
 
         options.push(format!(
             "{} | {} | {}",
             note.name, truncated_content, note.created
         ));
-    })
+    }
+    Ok(())
 }
 
-// TODO: Fix this method and its uses
-/* fn cursor_to_origin() {
-    print!("{esc}[2J{esc}[1;1H", esc = 27 as char);
-} */
+fn cursor_to_origin() -> Result<(), Box<dyn std::error::Error>> {
+    if cfg!(target_os = "windows") {
+        Command::new("cmd").args(["/c", "cls"]).spawn()?.wait()?;
+        Ok(())
+    } else {
+        Command::new("clear").spawn()?.wait()?;
+        Ok(())
+    }
+}
