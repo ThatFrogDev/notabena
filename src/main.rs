@@ -5,9 +5,8 @@ mod prompts;
 mod return_to_main;
 
 use crate::{
-    database::display::display,
     note::Note,
-    prompts::{confirm::confirm, multiselect::multiselect, select::select},
+    prompts::{multiselect::multiselect, select::select},
     /* return_to_main::return_to_main, */
 };
 use async_std::path::PathBuf;
@@ -33,9 +32,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         match select("What do you want to do?", &options) {
             0 => Note::create(&db_file).expect("Creating a new note failed"),
-            1 => show_notes(&db_file).expect("Failed fetching the notes"),
+            1 => Note::show(&db_file).expect("Failed fetching the notes"),
             2 => Note::edit(&db_file).expect("Editing the note failed"),
-            3 => delete_notes(&db_file).expect("Deleting the note failed"),
+            3 => Note::delete(&db_file).expect("Deleting the note failed"),
             4 => display_about().expect("Viewing about failed"),
             _ => {
                 cursor_to_origin()?;
@@ -49,61 +48,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
-fn show_notes(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-    let saved_notes = api::get_notes(db_file)?;
-
-    if saved_notes.is_empty() {
-        println!("You don't have any notes.");
-        return Ok(());
-    }
-
-    let mut options: Vec<String> = Vec::new();
-    truncated_note(&mut options, db_file)?;
-    let selection = select("Select the note that you want to view:", &options);
-    let selected_note = saved_notes[selection].clone();
-
-    display(&selected_note)?;
-    Ok(())
-}
-
-fn delete_notes(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
-    let mut options: Vec<String> = Vec::new();
-    truncated_note(&mut options, db_file)?;
-    let selections = multiselect(
-        "Select the note(s) that you want to delete:\nSpace to select, Enter to confirm.",
-        options,
-    );
-
-    let mut prompt = "Are you sure that you want to delete these notes?";
-    if selections.len() == 1 {
-        prompt = "Are you sure that you want to delete this note?";
-    }
-
-    cursor_to_origin()?;
-    if api::get_notes(db_file)?.is_empty() {
-        println!("You can't delete notes, because there are none.");
-        Ok(())
-    } else if selections.is_empty() {
-        println!("You didn't select any notes.");
-        return Ok(());
-    } else {
-        if confirm(prompt) {
-            api::delete_notes(selections, db_file)?;
-        }
-        println!("Notes deleted successfully.");
-        return Ok(());
-    }
-}
-
 fn display_about() -> Result<(), Box<dyn std::error::Error>> {
+    cursor_to_origin()?;
     println!("Notabena is a FOSS note-taking CLI tool, written in Rust.");
     println!("License: GPL v3\n");
-    println!("COPYRIGHT (c) 2023 NOTABENA ORGANISATION\nPROJECT LEADS @ThatFrogDev, @MrSerge01, GITHUB CONTRIBUTORS\n");
+    println!("COPYRIGHT (c) 2024 NOTABENA ORGANISATION\nPROJECT LEADS @ThatFrogDev, @MrSerge01, GITHUB CONTRIBUTORS\n");
 
     Ok(())
 }
 
-fn truncated_note(
+fn truncate_note(
     options: &mut Vec<String>,
     db_file: &PathBuf,
 ) -> Result<(), Box<dyn std::error::Error>> {

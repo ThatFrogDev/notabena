@@ -3,6 +3,7 @@ use crossterm::event::{Event, KeyCode, KeyEvent};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use std::time::Duration;
 
+// TODO: make it not bitch
 pub fn return_to_main() -> Result<(), Box<dyn std::error::Error>> {
     enable_raw_mode()?;
 
