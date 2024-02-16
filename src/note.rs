@@ -1,6 +1,6 @@
 use crate::{
-    api, cursor_to_origin,
-    database::display::display,
+    api,
+    utilities::{display::display, cursor_to_origin::cursor_to_origin},
     multiselect,
     prompts::{confirm::confirm, input::input, select::select},
     truncate_note,

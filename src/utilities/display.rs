@@ -1,6 +1,6 @@
 use termimad::*;
 
-use crate::database::format_md::format_md;
+use crate::utilities::format_md::format_md;
 use crate::note::Note;
 
 pub fn display(note: &Note) -> Result<(), Box<dyn std::error::Error>> {

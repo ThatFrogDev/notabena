@@ -1,5 +1,5 @@
 mod api;
-mod database;
+mod utilities;
 mod note;
 mod prompts;
 mod return_to_main;
@@ -7,11 +7,11 @@ mod return_to_main;
 use crate::{
     note::Note,
     prompts::{multiselect::multiselect, select::select},
+    utilities::{cursor_to_origin::cursor_to_origin, truncate_note::truncate_note},
     /* return_to_main::return_to_main, */
 };
 use async_std::path::PathBuf;
 use directories::BaseDirs;
-use std::process::Command;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data_directory: PathBuf = BaseDirs::new().unwrap().config_dir().into();
@@ -55,32 +55,4 @@ fn display_about() -> Result<(), Box<dyn std::error::Error>> {
     println!("COPYRIGHT (c) 2024 NOTABENA ORGANISATION\nPROJECT LEADS @ThatFrogDev, @MrSerge01, GITHUB CONTRIBUTORS\n");
 
     Ok(())
-}
-
-fn truncate_note(
-    options: &mut Vec<String>,
-    db_file: &PathBuf,
-) -> Result<(), Box<dyn std::error::Error>> {
-    for note in &api::get_notes(db_file)? {
-        let mut truncated_content: String = note.content.chars().take(10).collect();
-        if truncated_content.chars().count() == 10 {
-            truncated_content += "...";
-        }
-
-        options.push(format!(
-            "{} | {} | {}",
-            note.name, truncated_content, note.created
-        ));
-    }
-    Ok(())
-}
-
-fn cursor_to_origin() -> Result<(), Box<dyn std::error::Error>> {
-    if cfg!(target_os = "windows") {
-        Command::new("cmd").args(["/c", "cls"]).spawn()?.wait()?;
-        Ok(())
-    } else {
-        Command::new("clear").spawn()?.wait()?;
-        Ok(())
-    }
 }
