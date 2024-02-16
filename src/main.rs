@@ -1,8 +1,8 @@
 mod api;
-mod utilities;
 mod note;
 mod prompts;
 mod return_to_main;
+mod utilities;
 
 use crate::{
     note::Note,

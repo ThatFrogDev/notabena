@@ -1,9 +1,8 @@
 use crate::{
-    api,
-    utilities::{display::display, cursor_to_origin::cursor_to_origin},
-    multiselect,
+    api, multiselect,
     prompts::{confirm::confirm, input::input, select::select},
     truncate_note,
+    utilities::{cursor_to_origin::cursor_to_origin, display::display},
 };
 use async_std::path::PathBuf;
 use chrono::prelude::Local;
