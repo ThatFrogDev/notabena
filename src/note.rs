@@ -55,6 +55,7 @@ impl Note {
     }
 
     pub fn show(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+        cursor_to_origin()?;
         let saved_notes = api::get_notes(db_file)?;
 
         if saved_notes.is_empty() {
@@ -73,13 +74,14 @@ impl Note {
     }
 
     pub fn edit(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+        cursor_to_origin()?;
         let saved_notes = api::get_notes(db_file)?;
         let mut options: Vec<String> = Vec::new();
         truncate_note(&mut options, db_file)?;
         let selection = select("Select the note that you want to edit:", &options);
         let selected_note = &saved_notes[selection];
         let updated_note = Note {
-            id: selection,
+            id: selected_note.id.clone(),
             name: input("Name:", selected_note.name.clone()),
             content: input("Content:", selected_note.content.clone()),
             created: selected_note.created.clone(),
@@ -92,13 +94,6 @@ impl Note {
 
         match confirm("Are you sure that you want to edit this note?") {
             true => {
-                Connection::open(db_file)?.execute(
-                    "UPDATE saved_notes
-                        SET (name) = ?1, (content) = ?2
-                        WHERE id = ?3;",
-                    params![&selected_note.name, &selected_note.content, &selection],
-                )?;
-
                 cursor_to_origin()?;
                 api::save_note(&updated_note, db_file)?; // why the fuck whas this line not here yet
                 println!("Note updated successfully.");
@@ -109,6 +104,7 @@ impl Note {
     }
 
     pub fn delete(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+        cursor_to_origin()?;
         // yep yep yeah
         if api::get_notes(db_file)?.is_empty() {
             println!("You can't delete notes, because there are none.");
@@ -124,19 +120,23 @@ impl Note {
 
         let mut prompt = "Are you sure that you want to delete these notes?";
         if selections.len() == 1 {
-            prompt = "Are you sure that you want to delete this note?";
+            prompt = "Are you sure that you want to delete this note?"; // i love this
         }
 
         cursor_to_origin()?;
         if selections.is_empty() {
             println!("You didn't select any notes.");
-            return Ok(());
+            Ok(())
         } else {
             if confirm(prompt) {
                 api::delete_notes(selections, db_file)?;
+                cursor_to_origin()?;
+                println!("Notes deleted successfully.");
+                Ok(())
+            } else {
+                cursor_to_origin()?;
+                Ok(())
             }
-            println!("Notes deleted successfully.");
-            return Ok(());
         }
     }
 }
