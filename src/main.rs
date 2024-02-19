@@ -3,6 +3,7 @@ mod note;
 mod prompts;
 mod return_to_main;
 mod utilities;
+mod tests;
 
 use crate::{
     note::Note,
