@@ -1,5 +1,5 @@
 use crossterm::event;
-use crossterm::event::{Event, KeyCode, KeyEvent};
+use crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use std::time::Duration;
 
@@ -12,8 +12,8 @@ pub fn return_to_main() -> Result<(), Box<dyn std::error::Error>> {
             if let Event::Key(event) = event::read()? {
                 match event {
                     KeyEvent {
-                        code: KeyCode::Char('r'),
-                        modifiers: event::KeyModifiers::CONTROL,
+                        code: KeyCode::Char('q'),
+                        modifiers: KeyModifiers::ALT,
                         kind: _,
                         state: _,
                     } => return Ok(()),

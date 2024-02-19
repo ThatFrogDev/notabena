@@ -9,7 +9,7 @@ use crate::{
     note::Note,
     prompts::{multiselect::multiselect, select::select},
     utilities::{cursor_to_origin::cursor_to_origin, truncate_note::truncate_note},
-    /* return_to_main::return_to_main, */
+    return_to_main::return_to_main
 };
 use async_std::path::PathBuf;
 use directories::BaseDirs;

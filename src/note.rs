@@ -41,7 +41,6 @@ impl Note {
                         &inputted_note.created
                     ],
                 )?;
-
                 cursor_to_origin()?;
                 println!("Note created successfully.");
                 Ok(())
