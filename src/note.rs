@@ -1,7 +1,7 @@
 use crate::{
     api, multiselect,
     prompts::{confirm::confirm, input::input, select::select},
-    truncate_note,
+    return_to_main, truncate_note,
     utilities::{cursor_to_origin::cursor_to_origin, display::display},
 };
 use async_std::path::PathBuf;
@@ -19,10 +19,13 @@ pub struct Note {
 impl Note {
     pub fn create(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         cursor_to_origin()?;
+        println!(
+        "If you're done inputting a field, you can press Enter twice to continue or save, or Alt/Option-Q to return to the main menu.\r"
+        );
         let mut inputted_note = Note {
             id: api::get_notes(db_file)?.len(),
-            name: input("Name:", "".to_string()),
-            content: input("Content:", "".to_string()),
+            name: input("Name:", "".to_string())?,
+            content: input("Content:", "".to_string())?,
             created: format!("{}", Local::now().format("%A %e %B, %H:%M")),
         };
 
@@ -30,27 +33,18 @@ impl Note {
         println!("This is the note you're about to create:");
         display(&mut inputted_note)?;
 
-        match confirm("Do you want to save this note?") {
-            true => {
-                Connection::open(db_file)?.execute(
-                    "INSERT INTO saved_notes (id, name, content, created) VALUES (?1, ?2, ?3, ?4);",
-                    params![
-                        &inputted_note.id,
-                        &inputted_note.name,
-                        &inputted_note.content,
-                        &inputted_note.created
-                    ],
-                )?;
-
-                cursor_to_origin()?;
-                println!("Note created successfully.");
-                Ok(())
-            }
-            false => {
-                cursor_to_origin()?;
-                Ok(())
-            }
-        }
+        Connection::open(db_file)?.execute(
+            "INSERT INTO saved_notes (id, name, content, created) VALUES (?1, ?2, ?3, ?4);",
+            params![
+                &inputted_note.id,
+                &inputted_note.name,
+                &inputted_note.content,
+                &inputted_note.created
+            ],
+        )?;
+        cursor_to_origin()?;
+        println!("Note created successfully.");
+        Ok(())
     }
 
     pub fn show(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
@@ -74,6 +68,9 @@ impl Note {
 
     pub fn edit(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         cursor_to_origin()?;
+        println!(
+            "If you're done editing a field, you can press Enter twice to continue or save, or Alt/Option-Q to return to the main menu.\r"
+        );
         let saved_notes = api::get_notes(db_file)?;
         let mut options: Vec<String> = Vec::new();
         truncate_note(&mut options, db_file)?;
@@ -81,8 +78,8 @@ impl Note {
         let selected_note = &saved_notes[selection];
         let updated_note = Note {
             id: selected_note.id.clone(),
-            name: input("Name:", selected_note.name.clone()),
-            content: input("Content:", selected_note.content.clone()),
+            name: input("Name:", selected_note.name.clone())?,
+            content: input("Content:", selected_note.content.clone())?,
             created: selected_note.created.clone(),
         };
 
@@ -91,15 +88,10 @@ impl Note {
             println!("You can't edit notes, because there are none.");
         }
 
-        match confirm("Are you sure that you want to edit this note?") {
-            true => {
-                cursor_to_origin()?;
-                api::save_note(&updated_note, db_file)?; // why the fuck whas this line not here yet
-                println!("Note updated successfully.");
-                Ok(())
-            }
-            false => Ok(()),
-        }
+        cursor_to_origin()?;
+        api::save_note(&updated_note, db_file)?; // why the fuck whas this line not here yet
+        println!("Note updated successfully.");
+        Ok(())
     }
 
     pub fn delete(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {

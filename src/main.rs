@@ -2,13 +2,14 @@ mod api;
 mod note;
 mod prompts;
 mod return_to_main;
+mod tests;
 mod utilities;
 
 use crate::{
     note::Note,
     prompts::{multiselect::multiselect, select::select},
+    return_to_main::return_to_main,
     utilities::{cursor_to_origin::cursor_to_origin, truncate_note::truncate_note},
-    /* return_to_main::return_to_main, */
 };
 use async_std::path::PathBuf;
 use directories::BaseDirs;
