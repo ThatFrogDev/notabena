@@ -14,7 +14,7 @@ pub fn init_db(
 
     Connection::open(db_file)?.execute(
         "CREATE TABLE IF NOT EXISTS saved_notes (
-                id INTEGER NOT NULL,
+                id INTEGER PRIMARY KEY NOT NULL,
                 name TEXT NOT NULL,
                 content TEXT NOT NULL,
                 created TEXT NOT NULL
@@ -27,7 +27,7 @@ pub fn init_db(
 
 pub fn save_note(note: &Note, db_file: &PathBuf) -> Result<()> {
     Connection::open(db_file)?.execute(
-        "INSERT INTO saved_notes (id, name, content, created) VALUES (?1, ?2, ?3, ?4);",
+        "INSERT OR REPLACE INTO saved_notes (id, name, content, created) VALUES (?1, ?2, ?3, ?4);",
         params![&note.id, &note.name, &note.content, &note.created],
     )?;
 
