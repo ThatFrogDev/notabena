@@ -68,10 +68,16 @@ impl Note {
 
     pub fn edit(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
         cursor_to_origin()?;
+        let saved_notes = api::get_notes(db_file)?;
+
+        if saved_notes.is_empty() {
+            println!("You don't have any notes.");
+            return Ok(());
+        }
+
         println!(
             "If you're done editing a field, you can press Enter twice to continue or save, or Alt/Option-Q to return to the main menu.\r"
         );
-        let saved_notes = api::get_notes(db_file)?;
         let mut options: Vec<String> = Vec::new();
         truncate_note(&mut options, db_file)?;
         let selection = select("Select the note that you want to edit:", &options);
