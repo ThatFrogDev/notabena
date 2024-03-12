@@ -5,6 +5,8 @@ mod return_to_main;
 mod tests;
 mod utilities;
 
+use std::process::exit;
+
 use crate::{
     note::Note,
     prompts::{multiselect::multiselect, select::select},
@@ -37,10 +39,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             2 => Note::edit(&db_file).expect("Editing the note failed"),
             3 => Note::delete(&db_file).expect("Deleting the note failed"),
             4 => display_about().expect("Viewing about failed"),
-            _ => {
-                cursor_to_origin()?;
-                return Ok(());
-            }
+            5 => exit(0),
+            _ => (),
         }
 
         /*if return_to_main().is_ok() {

@@ -1,16 +1,23 @@
+use std::io::{self, Write};
 use termimad::*;
-
 use crate::note::Note;
-use crate::utilities::format_md::format_md;
+use crate::utilities::format_md::{paragraph, inline};
 
 pub fn display(note: &Note) -> Result<(), Box<dyn std::error::Error>> {
     let skin: MadSkin = MadSkin::default();
+    let formatted_note = format!(
+        "=======================\n\
+        {}\
+        {}\n\
+        {}\
+        =======================\n",
+        paragraph(&skin, &format!("# {}", inline(&skin, &note.name))),
+        paragraph(&skin, &note.content),
+        paragraph(&skin, &format!("*{}*", note.created))
+    );
 
-    println!("=======================");
-    println!("Name: {}", format_md(&skin, &note.name));
-    println!("Content: {}", format_md(&skin, &note.content));
-    println!("Created at: {}", note.created);
-    println!("=======================");
+    print!("{}", formatted_note);
+    io::stdout().flush()?;
 
     Ok(())
 }
