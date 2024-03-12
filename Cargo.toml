@@ -14,7 +14,7 @@ categories = [ "command-line-utilities", "gui", "text-processing" ]
 [dependencies]
 async-std = "1.12.0"
 directories = "5.0.1"
-chrono = "0.4.34"
+chrono = "0.4.35"
 dialoguer = "0.11.0"
 crossterm = "0.27.0"
 rusqlite = { version = "0.31.0", features = ["bundled"] }
