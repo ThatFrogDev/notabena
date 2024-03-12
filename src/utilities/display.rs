@@ -1,7 +1,7 @@
+use crate::note::Note;
+use crate::utilities::format_md::{inline, paragraph};
 use std::io::{self, Write};
 use termimad::*;
-use crate::note::Note;
-use crate::utilities::format_md::{paragraph, inline};
 
 pub fn display(note: &Note) -> Result<(), Box<dyn std::error::Error>> {
     let skin: MadSkin = MadSkin::default();
