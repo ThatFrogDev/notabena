@@ -31,7 +31,11 @@ You can help us in different ways.<br>
 **Contributing guidelines** for these three roles coming soon!
 
 ## Installation
-To install Notabena on **Windows**, simply run the file!
+There are a few different ways of installing Notabena:
+- **Recommended way:** through SourceForge: https://sourceforge.net/projects/notabena/. This requires no knowledge or programs, but if you want to run it with `notabena` you'll need to add it to `PATH` manually. Is your architecture not in there? Consider building for all the versions and [sending the binaries in our server](https://discord.gg/htNK4YcJB8).
+- **Package manager:** currently, Notabena only supports *Homebrew* for **MacOS** and **Linux**. The formula is in `chiissu/macchiato`. More package managers will be added at stable.
+  - (Still unsure? `brew tap chiissu/macchiato && brew install notabena`)
+- **The Rust way:** if you have Rust installed, we recommend installing it through `cargo` (`cargo install notabena`). It will automatically be added to your `PATH`.
 
 When running Notabena on **Linux or macOS**, you might encounter an error like this when running the file:<br>
 `bash: /home/Your-Username/Downloads/Your-Notabena-Installation: Permission denied`<br>
@@ -42,5 +46,4 @@ MacOS:
 `chmod u+x /Users/Your-Username/Downloads/Your-Notabena-Installation` (filling in the blanks)<br>
 The program should now run smoothly!<br>
 
-These are currently the only known errors during the installation of Notabena.
-If these solutions don't work or another error occurs, please open an issue so this section can be updated!
+There are no issues known with Windows installation. If you get another error or similar bug, please open an issue.

@@ -5,14 +5,21 @@ mod return_to_main;
 mod tests;
 mod utilities;
 
+use std::process::exit;
+
 use crate::{
     note::Note,
     prompts::{multiselect::multiselect, select::select},
     return_to_main::return_to_main,
-    utilities::{cursor_to_origin::cursor_to_origin, truncate_note::truncate_note},
+    utilities::{
+        cursor_to_origin::cursor_to_origin,
+        format_md::{inline, paragraph},
+        truncate_note::truncate_note,
+    },
 };
 use async_std::path::PathBuf;
 use directories::BaseDirs;
+use termimad::MadSkin;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data_directory: PathBuf = BaseDirs::new().unwrap().config_dir().into();
@@ -37,23 +44,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             2 => Note::edit(&db_file).expect("Editing the note failed"),
             3 => Note::delete(&db_file).expect("Deleting the note failed"),
             4 => display_about().expect("Viewing about failed"),
-            _ => {
-                cursor_to_origin()?;
-                return Ok(());
-            }
+            5 => exit(0),
+            _ => (),
         }
-
-        /*if return_to_main().is_ok() {
-            main()?;
-        }*/
     }
 }
 
 fn display_about() -> Result<(), Box<dyn std::error::Error>> {
+    let skin: MadSkin = MadSkin::default();
+
     cursor_to_origin()?;
-    println!("Notabena is a FOSS note-taking CLI tool, written in Rust.");
-    println!("License: GPL v3\n");
-    println!("COPYRIGHT (c) 2024 NOTABENA ORGANISATION\nPROJECT LEADS @ThatFrogDev, @MrSerge01, GITHUB CONTRIBUTORS\n");
+    println!("{}", paragraph(&skin, &format!("# About Notabena")));
+    println!(
+        "{}",
+        inline(
+            &skin,
+            "**Notabena** is a FOSS note-taking CLI tool, written in Rust.\n"
+        )
+    );
+    println!(
+        "version: v{}, licensed under: GPL v3",
+        env!("CARGO_PKG_VERSION")
+    );
+    println!("COPYRIGHT (c) 2023-PRESENT NOTABENA ORGANISATION\nPROJECT LEADS @ThatFrogDev, @MrSerge01, GITHUB CONTRIBUTORS\n");
 
     Ok(())
 }

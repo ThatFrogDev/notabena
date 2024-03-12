@@ -29,10 +29,6 @@ impl Note {
             created: format!("{}", Local::now().format("%A %e %B, %H:%M")),
         };
 
-        cursor_to_origin()?;
-        println!("This is the note you're about to create:");
-        display(&mut inputted_note)?;
-
         Connection::open(db_file)?.execute(
             "INSERT INTO saved_notes (id, name, content, created) VALUES (?1, ?2, ?3, ?4);",
             params![
@@ -62,7 +58,7 @@ impl Note {
         let mut selected_note = &saved_notes[selection];
         cursor_to_origin()?;
 
-        display(&mut selected_note)?;
+        display(&mut selected_note);
         Ok(())
     }
 
