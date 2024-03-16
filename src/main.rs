@@ -12,9 +12,7 @@ use crate::{
     prompts::{multiselect::multiselect, select::select},
     return_to_main::return_to_main,
     utilities::{
-        cursor_to_origin::cursor_to_origin,
-        format_md::paragraph,
-        truncate_note::truncate_note,
+        cursor_to_origin::cursor_to_origin, format_md::paragraph, truncate_note::truncate_note,
     },
 };
 use async_std::path::PathBuf;
