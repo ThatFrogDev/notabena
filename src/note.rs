@@ -22,12 +22,11 @@ impl Note {
 
         // fetch IDs from database, sort and find the first gap. if it does not exist, use the length of the array + 1
         let mut stmt = sqlite.prepare("SELECT id FROM saved_notes")?;
-        let ids: Result<Vec<usize>, _> = stmt
-            .query_map(params![], |row| row.get(0))?
-            .collect();
+        let ids: Result<Vec<usize>, _> = stmt.query_map(params![], |row| row.get(0))?.collect();
         let mut ids = ids?;
         ids.sort_unstable();
-        let id = ids.clone()
+        let id = ids
+            .clone()
             .into_iter()
             .enumerate()
             .find(|(i, id)| i + 1 != *id)
@@ -40,16 +39,16 @@ impl Note {
 
         let mut name: String;
         loop {
-          name = input("Name:", "".to_string())?;
-          if name.len() > 64 {
-            cursor_to_origin()?;
-            println!(
+            name = input("Name:", "".to_string())?;
+            if name.len() > 64 {
+                cursor_to_origin()?;
+                println!(
                 "If you're done inputting a field, you can press Enter twice to continue or save, or Alt/Option-Q to return to the main menu.\n\n\
                 error: The name is too long, it must be 64 characters or less.\r"
             );
-          } else {
-            break;
-          }
+            } else {
+                break;
+            }
         }
         let inputted_note = Note {
             id: id,
