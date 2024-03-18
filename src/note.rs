@@ -37,9 +37,23 @@ impl Note {
         println!(
         "If you're done inputting a field, you can press Enter twice to continue or save, or Alt/Option-Q to return to the main menu.\r"
         );
+
+        let mut name: String;
+        loop {
+          name = input("Name:", "".to_string())?;
+          if name.len() > 64 {
+            cursor_to_origin()?;
+            println!(
+                "If you're done inputting a field, you can press Enter twice to continue or save, or Alt/Option-Q to return to the main menu.\n\n\
+                error: The name is too long, it must be 64 characters or less.\r"
+            );
+          } else {
+            break;
+          }
+        }
         let inputted_note = Note {
             id: id,
-            name: input("Name:", "".to_string())?,
+            name: name,
             content: input("Content:", "".to_string())?,
             created: format!("{}", Local::now().format("%A %e %B, %H:%M")),
         };
