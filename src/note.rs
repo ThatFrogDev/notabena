@@ -1,7 +1,7 @@
 use crate::{
     api, multiselect,
     prompts::{confirm::confirm, input::input, select::select},
-    return_to_main, truncate_note,
+    truncate_note,
     utilities::{cursor_to_origin::cursor_to_origin, display::display},
 };
 use async_std::path::PathBuf;
@@ -18,18 +18,33 @@ pub struct Note {
 
 impl Note {
     pub fn create(db_file: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+        let sqlite = Connection::open(db_file)?;
+
+        // fetch IDs from database, sort and find the first gap. if it does not exist, use the length of the array + 1
+        let mut stmt = sqlite.prepare("SELECT id FROM saved_notes")?;
+        let ids: Result<Vec<usize>, _> = stmt
+            .query_map(params![], |row| row.get(0))?
+            .collect();
+        let mut ids = ids?;
+        ids.sort_unstable();
+        let id = ids.clone()
+            .into_iter()
+            .enumerate()
+            .find(|(i, id)| i + 1 != *id)
+            .map_or_else(|| ids.len() + 1, |(i, _)| i + 1);
+
         cursor_to_origin()?;
         println!(
         "If you're done inputting a field, you can press Enter twice to continue or save, or Alt/Option-Q to return to the main menu.\r"
         );
-        let mut inputted_note = Note {
-            id: api::get_notes(db_file)?.len(),
+        let inputted_note = Note {
+            id: id,
             name: input("Name:", "".to_string())?,
             content: input("Content:", "".to_string())?,
             created: format!("{}", Local::now().format("%A %e %B, %H:%M")),
         };
 
-        Connection::open(db_file)?.execute(
+        sqlite.execute(
             "INSERT INTO saved_notes (id, name, content, created) VALUES (?1, ?2, ?3, ?4);",
             params![
                 &inputted_note.id,
@@ -58,7 +73,7 @@ impl Note {
         let mut selected_note = &saved_notes[selection];
         cursor_to_origin()?;
 
-        display(&mut selected_note);
+        display(&mut selected_note)?;
         Ok(())
     }
 
