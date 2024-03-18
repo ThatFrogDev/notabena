@@ -12,9 +12,7 @@ use crate::{
     prompts::{multiselect::multiselect, select::select},
     return_to_main::return_to_main,
     utilities::{
-        cursor_to_origin::cursor_to_origin,
-        format_md::{inline, paragraph},
-        truncate_note::truncate_note,
+        cursor_to_origin::cursor_to_origin, format_md::paragraph, truncate_note::truncate_note,
     },
 };
 use async_std::path::PathBuf;
@@ -54,19 +52,19 @@ fn display_about() -> Result<(), Box<dyn std::error::Error>> {
     let skin: MadSkin = MadSkin::default();
 
     cursor_to_origin()?;
-    println!("{}", paragraph(&skin, &format!("# About Notabena")));
+    println!("{}", paragraph(&skin, "# About Notabena"));
     println!(
         "{}",
-        inline(
+        paragraph(
             &skin,
-            "**Notabena** is a FOSS note-taking CLI tool, written in Rust.\n"
+            "**Notabena** is a FOSS note-taking CLI tool, written in Rust.\nDonations are always a great way to help us keeping the project alive. It can be done here: https://paypal.me/Notabena (ctrl+click to follow link)."
         )
     );
     println!(
         "version: v{}, licensed under: GPL v3",
         env!("CARGO_PKG_VERSION")
     );
-    println!("COPYRIGHT (c) 2023-PRESENT NOTABENA ORGANISATION\nPROJECT LEADS @ThatFrogDev, @MrSerge01, GITHUB CONTRIBUTORS\n");
+    println!("COPYRIGHT (c) 2023-PRESENT NOTABENA ORGANISATION\nPROJECT LEADS @ThatFrogDev, @MrSerge01, GITHUB CONTRIBUTORS\n\n(scroll up if you can't read everything)");
 
     Ok(())
 }

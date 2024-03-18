@@ -65,5 +65,9 @@ pub fn get_notes(db_file: &PathBuf) -> Result<Vec<Note>> {
         notes.push(note?);
     }
 
+    // sort notes by date: newest first
+    notes.sort_by(|a, b| a.created.cmp(&b.created));
+    notes.reverse();
+
     Ok(notes)
 }
