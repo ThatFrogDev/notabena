@@ -52,7 +52,7 @@ fn display_about() -> Result<(), Box<dyn std::error::Error>> {
     let skin: MadSkin = MadSkin::default();
 
     cursor_to_origin()?;
-    println!("{}", paragraph(&skin, &format!("# About Notabena")));
+    println!("{}", paragraph(&skin, "# About Notabena"));
     println!(
         "{}",
         paragraph(

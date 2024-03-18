@@ -51,8 +51,8 @@ impl Note {
             }
         }
         let inputted_note = Note {
-            id: id,
-            name: name,
+            id,
+            name,
             content: input("Content:", "".to_string())?,
             created: format!("{}", Local::now().format("%A %e %B, %H:%M")),
         };
@@ -83,10 +83,10 @@ impl Note {
         let mut options: Vec<String> = Vec::new();
         truncate_note(&mut options, db_file)?;
         let selection = select("Select the note that you want to view:", &options);
-        let mut selected_note = &saved_notes[selection];
+        let selected_note = &saved_notes[selection];
         cursor_to_origin()?;
 
-        display(&mut selected_note)?;
+        display(selected_note)?;
         Ok(())
     }
 
@@ -107,7 +107,7 @@ impl Note {
         let selection = select("Select the note that you want to edit:", &options);
         let selected_note = &saved_notes[selection];
         let updated_note = Note {
-            id: selected_note.id.clone(),
+            id: selected_note.id,
             name: input("Name:", selected_note.name.clone())?,
             content: input("Content:", selected_note.content.clone())?,
             created: selected_note.created.clone(),
@@ -148,16 +148,14 @@ impl Note {
         if selections.is_empty() {
             println!("You didn't select any notes.");
             Ok(())
+        } else if confirm(prompt) {
+            api::delete_notes(selections, db_file)?;
+            cursor_to_origin()?;
+            println!("Notes deleted successfully.");
+            Ok(())
         } else {
-            if confirm(prompt) {
-                api::delete_notes(selections, db_file)?;
-                cursor_to_origin()?;
-                println!("Notes deleted successfully.");
-                Ok(())
-            } else {
-                cursor_to_origin()?;
-                Ok(())
-            }
+            cursor_to_origin()?;
+            Ok(())
         }
     }
 }
